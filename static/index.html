@@ -332,7 +332,6 @@ function renderCard(name, data) {
 
   card.innerHTML = body;
   updateBanner();
-  reorder();
 }
 
 // ── Best deal banner ──────────────────────────────────────────────────────
@@ -369,8 +368,7 @@ function reorder() {
     if (currentSort === 'match')    return (pb?.match_score||0) - (pa?.match_score||0);
     return 0;
   }).forEach(c => grid.appendChild(c));
-  // Re-render to update best-tag after sort
-  PHARMACIES.forEach(n => { if (DATA[n]) renderCard(n, DATA[n]); });
+  // NO recursive renderCard call here — just DOM reorder
 }
 
 // ── Main search ───────────────────────────────────────────────────────────
@@ -405,6 +403,8 @@ async function doSearch() {
       DATA[name] = d;
       renderCard(name, d);
     });
+    // Sort cards once after all are rendered
+    reorder();
 
     // Show timing
     const tb = document.getElementById('timeBadge');
@@ -453,6 +453,31 @@ function sortBy(t,b) {
   b.classList.add('active');
   currentSort = t;
   reorder();
+  // Update best-tag without triggering reorder again
+  const allPrices = PHARMACIES.map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
+  const bp = allPrices.length ? Math.min(...allPrices) : Infinity;
+  PHARMACIES.forEach(n => {
+    const card = document.getElementById('card-' + eid(n));
+    if (!card || !DATA[n]?.products?.[0]) return;
+    const isBest = DATA[n].products[0].price === bp && allPrices.length > 1;
+    card.className = 'card' + (isBest ? ' best' : '');
+    // Update or remove best-tag
+    const existing = card.querySelector('.best-tag');
+    if (isBest && !existing) {
+      const tag = document.createElement('div');
+      tag.className = 'best-tag';
+      tag.textContent = '🏆 BEST PRICE';
+      card.prepend(tag);
+    } else if (!isBest && existing) {
+      existing.remove();
+    }
+    // Update buy button class
+    const btn = card.querySelector('.buy');
+    if (btn) {
+      btn.className = 'buy ' + (isBest ? 'p' : 's');
+      btn.innerHTML = isBest ? '🛒 Buy — Best Price' : `View on ${n} →`;
+    }
+  });
 }
 function qs(t) { document.getElementById('inp').value = t; doSearch(); }
 document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
