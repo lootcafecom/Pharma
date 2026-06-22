@@ -159,6 +159,27 @@ async def clear_cache():
     cache.clear()
     return {"message": "Cache cleared"}
 
+
+# ── Playwright debug — shows ALL captured network responses ─────────────────
+@app.get("/api/debug/{pharmacy_name}")
+async def debug_playwright(pharmacy_name: str, q: str = Query(..., min_length=1)):
+    """Shows exactly what Playwright captures — all JSON responses"""
+    from extractor.network_extractor import extract_network_responses_debug
+
+    urls = {
+        "pharmeasy": f"https://pharmeasy.in/search/all?name={q}",
+        "1mg":       f"https://www.1mg.com/search/all?name={q}",
+        "netmeds":   f"https://www.netmeds.com/catalogsearch/result?q={q}",
+        "apollo":    f"https://www.apollopharmacy.in/search-medicines/{q}",
+        "medkart":   f"https://medkart.in/search?q={q}",
+    }
+
+    url = urls.get(pharmacy_name.lower())
+    if not url:
+        raise HTTPException(404, "Unknown pharmacy. Use: pharmeasy, 1mg, netmeds, apollo, medkart")
+
+    return await extract_network_responses_debug(url, wait_ms=7000)
+
 # ── Static frontend ───────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
