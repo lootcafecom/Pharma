@@ -1,30 +1,28 @@
 """
 Network Extractor — Core Engine
 ================================
-Instead of reading HTML, we open a real browser and
-intercept all XHR/Fetch network responses.
-
-This captures the actual JSON API calls pharmacies make
-internally to load product data — bypassing all anti-bot,
-JS rendering, and React/Vue issues.
+Opens pharmacy pages in real Chromium browser and intercepts
+all XHR/Fetch network responses to capture product JSON data.
 """
 import asyncio
 import json
 import re
 from typing import Callable
-from playwright.async_api import async_playwright, Page, Response, BrowserContext
+from playwright.async_api import async_playwright, Response
 
-# Keywords that indicate a response contains product/search data
+# Keywords that indicate useful API responses
 SEARCH_KEYWORDS = [
     "search", "product", "catalog", "drug", "sku",
-    "medicine", "listing", "item", "result", "query"
+    "medicine", "listing", "item", "result", "query",
+    "/api/", ".json", "autocomplete", "suggestion"
 ]
 
-# Keywords to skip — tracking, analytics, ads
+# Skip these — analytics, ads, tracking
 SKIP_KEYWORDS = [
     "analytics", "tracking", "gtm", "facebook", "google-analytics",
     "hotjar", "segment", "mixpanel", "clarity", "amplitude",
-    "ads", "pixel", "beacon", "log", "event"
+    "ads", "pixel", "beacon", "log", "event", "sentry",
+    "datadog", "newrelic", "bugsnag", "rollbar"
 ]
 
 def is_relevant_url(url: str) -> bool:
@@ -33,39 +31,33 @@ def is_relevant_url(url: str) -> bool:
         return False
     if any(kw in url_lower for kw in SEARCH_KEYWORDS):
         return True
-    # Also capture API calls
-    if "/api/" in url_lower or ".json" in url_lower:
-        return True
     return False
 
 def has_product_data(data: any) -> bool:
-    """Check if JSON response likely contains product/price data"""
     if not data:
         return False
-    text = json.dumps(data).lower()
-    return any(kw in text for kw in [
-        "price", "mrp", "sellingprice", "saleprice",
-        "selling_price", "offerprice", "productname",
-        "medicine", "drug", "tablet", "capsule"
-    ])
+    try:
+        text = json.dumps(data).lower()
+        return any(kw in text for kw in [
+            "price", "mrp", "sellingprice", "saleprice",
+            "selling_price", "offerprice", "productname",
+            "medicine", "drug", "tablet", "capsule"
+        ])
+    except Exception:
+        return False
 
 
 async def extract_network_responses(
     url: str,
-    wait_ms: int = 5000,
+    wait_ms: int = 6000,
     extra_actions: Callable = None,
 ) -> list[dict]:
     """
-    Open a URL in a headless browser, capture all relevant
-    XHR/Fetch network responses, and return them as a list.
-
-    Args:
-        url: The pharmacy search URL to open
-        wait_ms: How long to wait for network calls (ms)
-        extra_actions: Optional async function to perform on page
-                      (e.g. scroll, click, set pincode)
+    Open URL in headless Chromium, capture ALL JSON network responses.
+    Returns list of {url, data} dicts.
     """
-    captured = []
+    captured     = []
+    all_responses = []  # For debugging — captures everything
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -79,37 +71,54 @@ async def extract_network_responses(
                 "--no-zygote",
                 "--disable-gpu",
                 "--disable-blink-features=AutomationControlled",
+                "--disable-web-security",
+                "--disable-features=IsolateOrigins,site-per-process",
             ]
         )
 
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            viewport={"width": 1280, "height": 800},
+            viewport={"width": 1366, "height": 768},
             locale="en-IN",
             timezone_id="Asia/Kolkata",
             extra_http_headers={
                 "Accept-Language": "en-IN,en;q=0.9",
                 "Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "sec-ch-ua":       '"Chromium";v="124", "Google Chrome";v="124"',
+                "sec-ch-ua-mobile":"?0",
+                "sec-ch-ua-platform": '"Windows"',
             }
         )
 
-        # Intercept responses
+        # Block images and fonts to speed up loading
+        await context.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot}", lambda route: route.abort())
+
         async def handle_response(response: Response):
             try:
-                url_r = response.url
-                if not is_relevant_url(url_r):
+                resp_url = response.url
+                status   = response.status
+
+                # Track ALL responses for debug
+                all_responses.append({
+                    "url":    resp_url,
+                    "status": status,
+                    "ct":     response.headers.get("content-type", ""),
+                })
+
+                if status not in (200, 201):
                     return
+
                 ct = response.headers.get("content-type", "")
-                if "json" not in ct and "javascript" not in ct:
+                if "json" not in ct:
                     return
-                if response.status not in (200, 201):
-                    return
+
                 data = await response.json()
-                if has_product_data(data):
+                if data:
                     captured.append({
-                        "url":  url_r,
+                        "url":  resp_url,
                         "data": data,
                     })
+
             except Exception:
                 pass
 
@@ -117,21 +126,113 @@ async def extract_network_responses(
         page.on("response", handle_response)
 
         try:
-            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-
-            # Perform any extra actions (scroll, set pincode etc)
-            if extra_actions:
-                await extra_actions(page)
-
-            # Wait for XHR calls to complete
-            await page.wait_for_timeout(wait_ms)
-
+            await page.goto(url, wait_until="networkidle", timeout=30000)
         except Exception:
-            pass
-        finally:
-            await browser.close()
+            try:
+                # Fallback — just wait for domcontentloaded
+                await page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            except Exception:
+                pass
+
+        # Extra actions (scroll, set pincode etc)
+        if extra_actions:
+            try:
+                await extra_actions(page)
+            except Exception:
+                pass
+
+        # Wait for async XHR calls
+        await page.wait_for_timeout(wait_ms)
+
+        # Store all_responses on context for debug access
+        context._all_responses = all_responses
+
+        await browser.close()
 
     return captured
+
+
+async def extract_network_responses_debug(
+    url: str,
+    wait_ms: int = 6000,
+) -> dict:
+    """
+    Debug version — returns ALL captured responses with full details.
+    """
+    captured      = []
+    all_json_urls = []
+    all_urls      = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--no-first-run",
+                "--disable-blink-features=AutomationControlled",
+            ]
+        )
+
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+            viewport={"width": 1366, "height": 768},
+            locale="en-IN",
+            timezone_id="Asia/Kolkata",
+        )
+
+        await context.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot}", lambda route: route.abort())
+
+        async def handle_response(response: Response):
+            try:
+                resp_url = response.url
+                status   = response.status
+                ct       = response.headers.get("content-type", "")
+
+                all_urls.append(f"[{status}] {resp_url[:120]}")
+
+                if "json" in ct and status == 200:
+                    all_json_urls.append(resp_url)
+                    try:
+                        data = await response.json()
+                        if data:
+                            products = find_products_in_json(data)
+                            captured.append({
+                                "url":           resp_url,
+                                "has_products":  len(products) > 0,
+                                "product_count": len(products),
+                                "first_product": products[0] if products else None,
+                                "top_keys":      list(data.keys())[:10] if isinstance(data, dict) else type(data).__name__,
+                            })
+                    except Exception as e:
+                        captured.append({"url": resp_url, "error": str(e)})
+            except Exception:
+                pass
+
+        page = await context.new_page()
+        page.on("response", handle_response)
+
+        try:
+            await page.goto(url, wait_until="networkidle", timeout=30000)
+        except Exception:
+            try:
+                await page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            except Exception:
+                pass
+
+        await page.wait_for_timeout(wait_ms)
+        await browser.close()
+
+    return {
+        "url":              url,
+        "total_responses":  len(all_urls),
+        "json_responses":   len(all_json_urls),
+        "json_urls":        all_json_urls[:30],
+        "parsed_responses": captured,
+        "all_urls_sample":  all_urls[:50],
+    }
 
 
 def safe_float(val, default=0.0) -> float:
@@ -143,36 +244,46 @@ def safe_float(val, default=0.0) -> float:
 
 def find_products_in_json(data: any, depth: int = 0) -> list[dict]:
     """
-    Recursively search JSON for product arrays.
-    Returns the first list that looks like products.
+    Recursively search JSON for arrays that look like product lists.
+    Checks for presence of both a name field AND a price field.
     """
-    if depth > 6:
+    if depth > 8:
         return []
 
     if isinstance(data, list) and len(data) > 0:
         first = data[0]
         if isinstance(first, dict):
-            keys = set(k.lower() for k in first.keys())
-            # Check if this looks like a product
-            price_keys = {"price", "mrp", "sellingprice", "saleprice", "selling_price", "offerprice"}
-            name_keys  = {"name", "productname", "title", "medicinename", "display_name"}
-            if price_keys & keys and name_keys & keys:
+            keys_lower = {k.lower() for k in first.keys()}
+            price_keys = {
+                "price", "mrp", "sellingprice", "saleprice", "selling_price",
+                "offerprice", "offer_price", "discountedprice", "net_price",
+                "effectiveprice", "salesprice", "unitprice", "amount"
+            }
+            name_keys = {
+                "name", "productname", "product_name", "medicinename",
+                "medicine_name", "title", "display_name", "drugname",
+                "itemname", "brandname"
+            }
+            if price_keys & keys_lower and name_keys & keys_lower:
                 return data
         return []
 
     if isinstance(data, dict):
-        # Common product list keys
-        priority_keys = [
+        # Try high-priority keys first
+        priority = [
             "products", "skus", "items", "results", "data",
             "productList", "medicines", "drugs", "catalog",
-            "searchResult", "hits", "records"
+            "searchResult", "hits", "records", "list",
+            "product_list", "medicine_list", "drug_list",
+            "response", "payload", "body",
         ]
-        for key in priority_keys:
+        for key in priority:
             if key in data:
                 result = find_products_in_json(data[key], depth + 1)
                 if result:
                     return result
-        # Recurse into all values
+
+        # Try all other keys
         for val in data.values():
             if isinstance(val, (dict, list)):
                 result = find_products_in_json(val, depth + 1)
@@ -183,15 +294,15 @@ def find_products_in_json(data: any, depth: int = 0) -> list[dict]:
 
 
 def extract_price_fields(product: dict) -> tuple[float, float]:
-    """Extract price and MRP from a product dict"""
     price_fields = [
         "selling_price", "sellingPrice", "saleprice", "salePriceDecimal",
         "offerPrice", "offer_price", "price", "discountedPrice",
-        "effective_price", "net_price"
+        "effective_price", "net_price", "unitPrice", "amount"
     ]
     mrp_fields = [
         "mrp", "MRP", "mrpPrice", "mrpDecimal", "max_retail_price",
-        "marked_price", "original_price", "maxPrice", "compare_at_price"
+        "marked_price", "original_price", "maxPrice", "compare_at_price",
+        "listPrice", "standardPrice"
     ]
 
     price = 0.0
@@ -216,7 +327,8 @@ def extract_price_fields(product: dict) -> tuple[float, float]:
 def extract_name_fields(product: dict) -> str:
     name_fields = [
         "name", "productName", "product_name", "medicineName",
-        "medicine_name", "title", "display_name", "drugName"
+        "medicine_name", "title", "display_name", "drugName",
+        "itemName", "brandName", "skuName"
     ]
     for f in name_fields:
         v = product.get(f)
@@ -228,7 +340,7 @@ def extract_name_fields(product: dict) -> str:
 def extract_slug_fields(product: dict) -> str:
     slug_fields = [
         "slug", "urlKey", "url_key", "handle", "sku",
-        "productId", "product_id", "id", "skuId"
+        "productId", "product_id", "id", "skuId", "itemId"
     ]
     for f in slug_fields:
         v = product.get(f)
