@@ -200,7 +200,7 @@ async def raw_debug(pharmacy_name: str, q: str = Query(..., min_length=1)):
             }
         },
         "netmeds": {
-            "url": f"https://www.netmeds.com/api/service/application/catalog/v1.0/search/?q={quote(q)}&page_no=1&page_size=10",
+            "url": f"https://www.netmeds.com/prescriptions/search-results?q={quote(q)}",
             "headers": {
                 "User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
                 "Accept":          "application/json",
