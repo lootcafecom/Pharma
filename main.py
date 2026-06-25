@@ -252,6 +252,97 @@ async def raw_debug(pharmacy_name: str, q: str = Query(..., min_length=1)):
             "body":   r.text[:500],
         }
 
+
+# ── Raw API debug v2 ──────────────────────────────────────────────────────────
+@app.get("/api/rawdebug2/{pharmacy_name}")
+async def raw_debug2(pharmacy_name: str, q: str = Query(..., min_length=1)):
+    """Test fixed API calls for 1mg, netmeds, medkart"""
+    import httpx
+    from urllib.parse import quote
+
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+
+    results = []
+
+    if pharmacy_name == "1mg":
+        # 1mg needs city cookie — try with cookie header
+        tests = [
+            {
+                "url": f"https://www.1mg.com/pwa-dweb-api/api/v4/search/all?q={quote(q)}&page_number=0&per_page=10&types=sku,allopathy&sort=relevance",
+                "headers": {
+                    "User-Agent": UA, "Accept": "application/json",
+                    "Referer": "https://www.1mg.com/",
+                    "Cookie": "city=Delhi; city_id=Delhi",
+                }
+            },
+            {
+                "url": f"https://www.1mg.com/pwa-dweb-api/api/v4/search/all?q={quote(q)}&city_id=Delhi&page_number=0&per_page=10&types=sku,allopathy&sort=relevance",
+                "headers": {"User-Agent": UA, "Accept": "application/json", "Referer": "https://www.1mg.com/"}
+            },
+            {
+                "url": f"https://www.1mg.com/pwa-dweb-api/api/v4/search/all?q={quote(q)}&city=Delhi&page_number=0&per_page=10&types=sku,allopathy&sort=relevance&fetch_eta=false",
+                "headers": {"User-Agent": UA, "Accept": "application/json", "Referer": "https://www.1mg.com/",
+                            "Cookie": "city=Delhi"}
+            },
+        ]
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            for t in tests:
+                r = await client.get(t["url"], headers=t["headers"])
+                try:
+                    data = r.json()
+                except Exception:
+                    data = r.text[:200]
+                results.append({"url": t["url"][:100], "status": r.status_code, "data": str(data)[:300]})
+
+    elif pharmacy_name == "netmeds":
+        # NetMeds needs auth token — first fetch page to get token
+        tests = [
+            # Try without token first
+            f"https://www.netmeds.com/api/service/application/catalog/v1.0/search/?q={quote(q)}&page_no=1&page_size=5",
+            # Try with x-location-detail header
+            f"https://www.netmeds.com/api/service/application/catalog/v2.0/search/?q={quote(q)}&page_no=1&page_size=5",
+            # Try Fynd direct
+            f"https://api.fynd.com/service/application/catalog/v1.0/search/?q={quote(q)}&page_no=1&page_size=5",
+        ]
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            # First get token from page
+            page_r = await client.get("https://www.netmeds.com", headers={"User-Agent": UA})
+            token_match = __import__('re').search(r'"application_token"\s*:\s*"([^"]+)"', page_r.text)
+            token = token_match.group(1) if token_match else None
+
+            for url in tests:
+                h = {"User-Agent": UA, "Accept": "application/json", "Referer": "https://www.netmeds.com/"}
+                if token:
+                    h["x-application-token"] = token
+                r = await client.get(url, headers=h)
+                try:
+                    data = r.json()
+                except Exception:
+                    data = r.text[:200]
+                results.append({"url": url[:100], "status": r.status_code, "token_found": bool(token), "data": str(data)[:300]})
+
+    elif pharmacy_name == "medkart":
+        # MedKart — try different API paths
+        tests = [
+            f"https://app.medkart.in/api/v1/search?q={quote(q)}&limit=10",
+            f"https://app.medkart.in/api/medicines/search?q={quote(q)}",
+            f"https://app.medkart.in/api/v2/medicine/search?name={quote(q)}",
+            f"https://app.medkart.in/api/v2/medicines?search={quote(q)}",
+            f"https://www.medkart.in/api/search?q={quote(q)}",
+        ]
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            for url in tests:
+                h = {"User-Agent": UA, "Accept": "application/json",
+                     "Referer": "https://www.medkart.in/", "Origin": "https://www.medkart.in"}
+                r = await client.get(url, headers=h)
+                try:
+                    data = r.json()
+                except Exception:
+                    data = r.text[:200]
+                results.append({"url": url[:100], "status": r.status_code, "data": str(data)[:300]})
+
+    return {"pharmacy": pharmacy_name, "results": results}
+
 # ── Static frontend ───────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
