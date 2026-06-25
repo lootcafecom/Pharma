@@ -180,6 +180,78 @@ async def debug_playwright(pharmacy_name: str, q: str = Query(..., min_length=1)
 
     return await extract_network_responses_debug(url, wait_ms=7000)
 
+
+# ── Raw API debug — fetch exact JSON from pharmacy API ───────────────────────
+@app.get("/api/rawdebug/{pharmacy_name}")
+async def raw_debug(pharmacy_name: str, q: str = Query(..., min_length=1)):
+    """Fetch raw JSON from pharmacy API and show full structure"""
+    import httpx
+    from urllib.parse import quote
+
+    configs = {
+        "1mg": {
+            "url": f"https://www.1mg.com/pwa-dweb-api/api/v4/search/all?q={quote(q)}&city=New%20Delhi&filter=&page_number=0&scroll_id=&per_page=10&types=sku,allopathy&sort=relevance&fetch_eta=true&is_city_serviceable=true",
+            "headers": {
+                "User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+                "Accept":          "application/json",
+                "Referer":         "https://www.1mg.com/",
+                "Origin":          "https://www.1mg.com",
+                "Accept-Language": "en-IN,en;q=0.9",
+            }
+        },
+        "netmeds": {
+            "url": f"https://www.netmeds.com/api/service/application/catalog/v1.0/search/?q={quote(q)}&page_no=1&page_size=10",
+            "headers": {
+                "User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+                "Accept":          "application/json",
+                "Referer":         "https://www.netmeds.com/",
+                "x-domain":        "www.netmeds.com",
+                "Accept-Language": "en-IN,en;q=0.9",
+            }
+        },
+        "medkart": {
+            "url": f"https://app.medkart.in/api/v2/search?q={quote(q)}&limit=10",
+            "headers": {
+                "User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+                "Accept":          "application/json",
+                "Referer":         "https://www.medkart.in/",
+                "Origin":          "https://www.medkart.in",
+                "Accept-Language": "en-IN,en;q=0.9",
+            }
+        },
+    }
+
+    config = configs.get(pharmacy_name.lower())
+    if not config:
+        raise HTTPException(404, "Use: 1mg, netmeds, medkart")
+
+    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+        r = await client.get(config["url"], headers=config["headers"])
+
+    def summarize(obj, depth=0):
+        if depth > 4: return "..."
+        if isinstance(obj, dict):
+            return {k: summarize(v, depth+1) for k, v in list(obj.items())[:15]}
+        elif isinstance(obj, list):
+            return f"LIST[{len(obj)}] first={summarize(obj[0], depth+1) if obj else None}"
+        return str(obj)[:100]
+
+    try:
+        data = r.json()
+        return {
+            "url":        config["url"],
+            "status":     r.status_code,
+            "structure":  summarize(data),
+            "raw_sample": str(data)[:2000],
+        }
+    except Exception as e:
+        return {
+            "url":    config["url"],
+            "status": r.status_code,
+            "error":  str(e),
+            "body":   r.text[:500],
+        }
+
 # ── Static frontend ───────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
