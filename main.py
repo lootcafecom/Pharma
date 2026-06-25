@@ -343,6 +343,49 @@ async def raw_debug2(pharmacy_name: str, q: str = Query(..., min_length=1)):
 
     return {"pharmacy": pharmacy_name, "results": results}
 
+
+# ── Playwright deep debug — shows ALL captured URLs ──────────────────────────
+@app.get("/api/deepdebug/{pharmacy_name}")
+async def deep_debug(pharmacy_name: str, q: str = Query(..., min_length=1)):
+    """Shows every single response Playwright captures including non-JSON"""
+    from extractor.network_extractor import extract_network_responses_debug
+
+    urls = {
+        "1mg":      f"https://www.1mg.com/search/all?name={q}",
+        "netmeds":  f"https://www.netmeds.com/prescriptions/search-results?q={q}",
+        "medkart":  f"https://www.medkart.in/search?q={q}",
+    }
+
+    url = urls.get(pharmacy_name.lower())
+    if not url:
+        raise HTTPException(404, "Use: 1mg, netmeds, medkart")
+
+    result = await extract_network_responses_debug(url, wait_ms=9000)
+
+    # Filter to show only interesting URLs — skip assets/analytics
+    interesting = [
+        u for u in result.get("all_urls_sample", [])
+        if not any(skip in u.lower() for skip in [
+            ".js", ".css", ".png", ".jpg", ".svg", ".woff",
+            "google", "facebook", "analytics", "gtm", "sentry",
+            "doubleclick", "rudder", "segment", "hotjar"
+        ])
+    ]
+
+    return {
+        "pharmacy":         pharmacy_name,
+        "url":              url,
+        "total_responses":  result["total_responses"],
+        "json_responses":   result["json_responses"],
+        "json_urls":        result["json_urls"],
+        "interesting_urls": interesting[:30],
+        "parsed_with_products": [
+            r for r in result["parsed_responses"]
+            if r.get("has_products")
+        ],
+        "all_parsed":       result["parsed_responses"][:20],
+    }
+
 # ── Static frontend ───────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
