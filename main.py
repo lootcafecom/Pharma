@@ -593,6 +593,70 @@ async def test_playwright_new(q: str = Query(...)):
 
     return results
 
+
+# ── Truemeds API hunt ─────────────────────────────────────────────────────────
+@app.get("/api/truemedstest")
+async def truemeds_test(q: str = Query(...)):
+    """Get Truemeds session token then call search API"""
+    import httpx
+    from urllib.parse import quote
+    UA  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    results = []
+
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+
+        # Step 1: Get session token
+        token = None
+        try:
+            r = await client.get(
+                "https://www.truemeds.in/api/getSessionToken",
+                headers={"User-Agent": UA, "Accept": "*/*",
+                         "Referer": "https://www.truemeds.in/"}
+            )
+            token = r.text.strip().strip('"')
+            results.append({"step": "token", "status": r.status_code, "token": token[:50] + "..."})
+        except Exception as e:
+            results.append({"step": "token", "error": str(e)})
+
+        if not token:
+            return {"error": "Could not get token", "results": results}
+
+        # Step 2: Try search APIs with token
+        search_apis = [
+            f"https://nal.tmmumbai.in/ProductService/v3/searchProductsByName?name={quote(q)}&pageNo=0&pageSize=10&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v2/searchProductsByName?name={quote(q)}&pageNo=0&pageSize=10&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/searchProductsByName?name={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v1/searchMedicines?query={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v3/search?query={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/SearchService/v1/searchProducts?name={quote(q)}&sessionToken={token}",
+        ]
+
+        h = {
+            "User-Agent":    UA,
+            "Accept":        "application/json",
+            "Referer":       "https://www.truemeds.in/",
+            "sessionToken":  token,
+            "Authorization": f"Bearer {token}",
+        }
+
+        for api in search_apis:
+            try:
+                r = await client.get(api, headers=h)
+                try:
+                    data = r.json()
+                except Exception:
+                    data = r.text[:300]
+                results.append({
+                    "step":   "search",
+                    "url":    api[:100],
+                    "status": r.status_code,
+                    "data":   str(data)[:400],
+                })
+            except Exception as e:
+                results.append({"step": "search", "url": api[:80], "error": str(e)})
+
+    return {"results": results}
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
