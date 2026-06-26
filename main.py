@@ -548,6 +548,51 @@ async def test_pharmacy(q: str = Query(...)):
 
     return results
 
+
+# ── Truemeds + MrMed Playwright test ─────────────────────────────────────────
+@app.get("/api/testplawright")
+async def test_playwright_new(q: str = Query(...)):
+    """Test Truemeds and MrMed via Playwright"""
+    results = {}
+
+    # Test Truemeds
+    tm_url   = f"https://www.truemeds.in/search?query={q}"
+    tm_resps = await capture(tm_url, 6000)
+    tm_found = []
+    for r in tm_resps:
+        items = find_list(r.get("data", {}))
+        tm_found.append({
+            "url":          r["url"][:100],
+            "has_products": len(items) > 0,
+            "top_keys":     list(r["data"].keys())[:8] if isinstance(r["data"], dict) else "list",
+            "sample":       str(r["data"])[:200],
+        })
+    results["truemeds"] = {
+        "url":       tm_url,
+        "responses": len(tm_resps),
+        "captured":  tm_found,
+    }
+
+    # Test MrMed
+    mm_url   = f"https://www.mrmed.in/search?q={q}"
+    mm_resps = await capture(mm_url, 6000)
+    mm_found = []
+    for r in mm_resps:
+        items = find_list(r.get("data", {}))
+        mm_found.append({
+            "url":          r["url"][:100],
+            "has_products": len(items) > 0,
+            "top_keys":     list(r["data"].keys())[:8] if isinstance(r["data"], dict) else "list",
+            "sample":       str(r["data"])[:200],
+        })
+    results["mrmed"] = {
+        "url":       mm_url,
+        "responses": len(mm_resps),
+        "captured":  mm_found,
+    }
+
+    return results
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
