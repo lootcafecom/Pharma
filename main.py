@@ -337,6 +337,61 @@ async def popular():
 async def clear_cache():
     cache.clear(); return {"message": "Cache cleared"}
 
+
+# ── NetMeds + MedKart deep debug ─────────────────────────────────────────────
+@app.get("/api/nmdebug")
+async def nm_debug(q: str = Query(...)):
+    """Debug NetMeds and MedKart XHR capture"""
+    results = {}
+
+    # NetMeds
+    nm_url  = f"https://www.netmeds.com/prescriptions/search-results?q={q}"
+    nm_captured = []
+
+    async def nm_scroll(page):
+        await page.wait_for_timeout(3000)
+        await page.evaluate("window.scrollTo(0, 500)")
+        await page.wait_for_timeout(2000)
+
+    nm_resps = await capture(nm_url, 7000, nm_scroll)
+    for r in nm_resps:
+        nm_captured.append({
+            "url":      r["url"][:120],
+            "top_keys": list(r["data"].keys())[:10] if isinstance(r["data"], dict) else type(r["data"]).__name__,
+            "sample":   str(r["data"])[:300],
+        })
+
+    results["netmeds"] = {
+        "url":        nm_url,
+        "responses":  len(nm_resps),
+        "captured":   nm_captured,
+    }
+
+    # MedKart
+    mk_url = f"https://www.medkart.in/search?q={q}"
+    mk_captured = []
+
+    async def mk_scroll(page):
+        await page.wait_for_timeout(3000)
+        await page.evaluate("window.scrollTo(0, 500)")
+        await page.wait_for_timeout(2000)
+
+    mk_resps = await capture(mk_url, 7000, mk_scroll)
+    for r in mk_resps:
+        mk_captured.append({
+            "url":      r["url"][:120],
+            "top_keys": list(r["data"].keys())[:10] if isinstance(r["data"], dict) else type(r["data"]).__name__,
+            "sample":   str(r["data"])[:300],
+        })
+
+    results["medkart"] = {
+        "url":        mk_url,
+        "responses":  len(mk_resps),
+        "captured":   mk_captured,
+    }
+
+    return results
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
