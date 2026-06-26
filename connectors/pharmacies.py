@@ -126,31 +126,70 @@ async def connect_pharmeasy(query: str, pincode: str = None) -> dict:
     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None if products else "No products found"}
 
 
-# ── 1mg — Playwright with city session ────────────────────────────────────────
+# ── 1mg — Playwright + custom parser for search_results structure ─────────────
 async def connect_1mg(query: str, pincode: str = None) -> dict:
     pharmacy  = "1mg"
     url       = f"https://www.1mg.com/search/all?name={query}"
 
-    # 1mg requires city cookie set by browser session
-    # Playwright will automatically handle cookies and session
+    captured_data = {}
+
     async def setup_session(page):
-        # Wait for 1mg to set city cookie automatically
         await page.wait_for_timeout(2000)
-        # Try to set city via localStorage as fallback
-        try:
-            await page.evaluate("""
-                localStorage.setItem('city', 'New Delhi');
-                localStorage.setItem('city_id', '3');
-                localStorage.setItem('pincode', '110001');
-            """)
-        except Exception:
-            pass
-        # Scroll to trigger product loading
         await page.evaluate("window.scrollTo(0, 300)")
         await page.wait_for_timeout(2000)
 
-    responses = await extract_network_responses(url, wait_ms=8000, extra_actions=setup_session)
-    products  = build_products(responses, pharmacy, url, "https://www.1mg.com/drugs/")
+    from playwright.async_api import async_playwright
+    import re as _re
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True, args=[
+            "--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"
+        ])
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+            locale="en-IN", timezone_id="Asia/Kolkata"
+        )
+        await context.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf}", lambda r: r.abort())
+
+        async def capture(response):
+            if "search/all" in response.url and "pwa-dweb-api" in response.url:
+                try:
+                    captured_data["response"] = await response.json()
+                except Exception:
+                    pass
+
+        page = await context.new_page()
+        page.on("response", capture)
+        try:
+            await page.goto(url, wait_until="networkidle", timeout=30000)
+        except Exception:
+            pass
+        await page.wait_for_timeout(5000)
+        await browser.close()
+
+    # Parse 1mg specific structure
+    # data.search_results is a list of products
+    # prices are strings like "₹32.13" — need to strip ₹
+    def parse_price(s):
+        if not s: return 0.0
+        cleaned = _re.sub(r"[^\d.]", "", str(s))
+        try: return float(cleaned)
+        except: return 0.0
+
+    products = []
+    resp = captured_data.get("response", {})
+    items = resp.get("data", {}).get("search_results", [])
+
+    for item in items[:5]:
+        name   = item.get("name", "")
+        prices = item.get("prices", {})
+        price  = parse_price(prices.get("discounted_price") or prices.get("mrp"))
+        mrp    = parse_price(prices.get("mrp") or prices.get("discounted_price"))
+        path   = item.get("url", "")
+        link   = f"https://www.1mg.com{path}" if path else url
+        prod   = make_product(name, price, mrp, link)
+        if prod:
+            products.append(prod)
 
     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None if products else "No products found"}
 
