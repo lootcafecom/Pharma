@@ -392,6 +392,92 @@ async def nm_debug(q: str = Query(...)):
 
     return results
 
+
+# ── NetMeds + MedKart direct API hunt ────────────────────────────────────────
+@app.get("/api/hunt")
+async def hunt(q: str = Query(...)):
+    """Try every possible API for NetMeds and MedKart"""
+    import httpx
+    from urllib.parse import quote
+    results = {}
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+
+    # ── NetMeds ──────────────────────────────────────────────────────────────
+    nm_tests = []
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+
+        # Try POST search (Fynd uses POST for search)
+        post_apis = [
+            "https://www.netmeds.com/api/service/application/catalog/v1.0/search/",
+            "https://www.netmeds.com/api/service/application/catalog/v2.0/search/",
+        ]
+        for api in post_apis:
+            try:
+                r = await client.post(api,
+                    headers={"User-Agent": UA, "Accept": "application/json",
+                             "Content-Type": "application/json",
+                             "Referer": "https://www.netmeds.com/"},
+                    json={"q": q, "page_no": 1, "page_size": 5}
+                )
+                nm_tests.append({"method":"POST","url":api[:80],"status":r.status_code,"body":r.text[:200]})
+            except Exception as e:
+                nm_tests.append({"method":"POST","url":api[:80],"error":str(e)})
+
+        # Try GET with different headers
+        get_apis = [
+            f"https://www.netmeds.com/api/service/application/catalog/v1.0/search/?q={quote(q)}&page_no=1&page_size=5",
+            f"https://www.netmeds.com/api/service/application/catalog/v2.0/search/?q={quote(q)}&page_no=1&page_size=5",
+            f"https://www.netmeds.com/catalogsearch/result/index/?q={quote(q)}&format=json",
+            f"https://www.netmeds.com/api/v1/search?q={quote(q)}",
+        ]
+        for api in get_apis:
+            try:
+                # Get app token from homepage first
+                home = await client.get("https://www.netmeds.com/",
+                    headers={"User-Agent": UA})
+                import re
+                token_m = re.search(r'"x-application-token"\s*:\s*"([^"]+)"', home.text)
+                app_token = token_m.group(1) if token_m else None
+
+                hdrs = {"User-Agent": UA, "Accept": "application/json",
+                        "Referer": "https://www.netmeds.com/"}
+                if app_token:
+                    hdrs["x-application-token"] = app_token
+
+                r = await client.get(api, headers=hdrs)
+                nm_tests.append({"method":"GET","url":api[:80],"status":r.status_code,
+                                  "token":bool(app_token),"body":r.text[:200]})
+            except Exception as e:
+                nm_tests.append({"method":"GET","url":api[:80],"error":str(e)})
+
+    results["netmeds"] = nm_tests
+
+    # ── MedKart ──────────────────────────────────────────────────────────────
+    mk_tests = []
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        mk_apis = [
+            f"https://www.medkart.in/search?q={quote(q)}&_rsc=1",
+            f"https://www.medkart.in/api/medicines?name={quote(q)}",
+            f"https://app.medkart.in/api/v2/products?search={quote(q)}&limit=10",
+            f"https://app.medkart.in/api/v2/drug/search?q={quote(q)}",
+            f"https://app.medkart.in/api/v2/catalog/search?q={quote(q)}",
+            f"https://app.medkart.in/api/v3/search?q={quote(q)}",
+            f"https://www.medkart.in/_next/data/search?q={quote(q)}",
+        ]
+        for api in mk_apis:
+            try:
+                r = await client.get(api, headers={
+                    "User-Agent": UA, "Accept": "application/json",
+                    "Referer": "https://www.medkart.in/",
+                    "Origin": "https://www.medkart.in"
+                })
+                mk_tests.append({"url":api[:90],"status":r.status_code,"body":r.text[:200]})
+            except Exception as e:
+                mk_tests.append({"url":api[:90],"error":str(e)})
+
+    results["medkart"] = mk_tests
+    return results
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
