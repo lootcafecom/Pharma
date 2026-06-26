@@ -29,6 +29,13 @@ from database.db import init_db, save_search, get_popular_searches
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    # Pre-warm the shared browser on startup
+    try:
+        from extractor.browser_pool import get_browser
+        await get_browser()
+        print("✅ Playwright browser initialized")
+    except Exception as e:
+        print(f"⚠️ Browser init failed: {e}")
     yield
 
 app = FastAPI(
