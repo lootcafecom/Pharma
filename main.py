@@ -386,6 +386,63 @@ async def deep_debug(pharmacy_name: str, q: str = Query(..., min_length=1)):
         "all_parsed":       result["parsed_responses"][:20],
     }
 
+
+# ── 1mg specific deep dive ────────────────────────────────────────────────────
+@app.get("/api/1mgdebug")
+async def mg_debug(q: str = Query(...)):
+    """Capture 1mg search response and show full nested structure"""
+    from playwright.async_api import async_playwright
+    import json
+
+    captured = None
+    url = f"https://www.1mg.com/search/all?name={q}"
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True, args=[
+            "--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"
+        ])
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+            locale="en-IN", timezone_id="Asia/Kolkata"
+        )
+
+        async def handle(response):
+            nonlocal captured
+            if "search/all" in response.url and "pwa-dweb-api" in response.url:
+                try:
+                    captured = await response.json()
+                except Exception:
+                    pass
+
+        page = await context.new_page()
+        page.on("response", handle)
+        try:
+            await page.goto(url, wait_until="networkidle", timeout=30000)
+        except Exception:
+            pass
+        await page.wait_for_timeout(5000)
+        await browser.close()
+
+    if not captured:
+        return {"error": "No search API response captured"}
+
+    # Show full structure recursively
+    def show(obj, depth=0, max_depth=5):
+        if depth > max_depth: return "..."
+        if isinstance(obj, dict):
+            return {k: show(v, depth+1) for k, v in list(obj.items())[:20]}
+        elif isinstance(obj, list):
+            if len(obj) > 0 and isinstance(obj[0], dict):
+                return f"LIST[{len(obj)}] keys={list(obj[0].keys())[:15]} sample={show(obj[0], depth+1)}"
+            return f"LIST[{len(obj)}] = {str(obj[:2])[:200]}"
+        return str(obj)[:150]
+
+    return {
+        "url_captured": "1mg search/all",
+        "top_keys":     list(captured.keys()),
+        "structure":    show(captured),
+    }
+
 # ── Static frontend ───────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
