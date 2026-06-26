@@ -478,6 +478,76 @@ async def hunt(q: str = Query(...)):
     results["medkart"] = mk_tests
     return results
 
+
+# ── Test new pharmacies ───────────────────────────────────────────────────────
+@app.get("/api/testpharmacy")
+async def test_pharmacy(q: str = Query(...)):
+    """Test Truemeds and MrMed scraping"""
+    import httpx, re, json
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    results = {}
+
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+
+        # Test Truemeds
+        truemeds_url = f"https://www.truemeds.in/search?query={q}"
+        r = await client.get(truemeds_url, headers={"User-Agent": UA, "Accept-Language": "en-IN"})
+        m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.DOTALL)
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                pp   = data.get("props",{}).get("pageProps",{})
+                results["truemeds"] = {
+                    "status":        r.status_code,
+                    "has_next_data": True,
+                    "pageProps_keys": list(pp.keys()),
+                    "sample":        str(pp)[:500],
+                }
+            except Exception as e:
+                results["truemeds"] = {"status": r.status_code, "error": str(e)}
+        else:
+            results["truemeds"] = {
+                "status":        r.status_code,
+                "has_next_data": False,
+                "html_size":     len(r.text),
+                "html_sample":   r.text[:300],
+            }
+
+        # Test MrMed
+        mrmed_url = f"https://www.mrmed.in/search?q={q}"
+        r2 = await client.get(mrmed_url, headers={"User-Agent": UA, "Accept-Language": "en-IN"})
+        m2 = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r2.text, re.DOTALL)
+        if m2:
+            try:
+                data2 = json.loads(m2.group(1))
+                pp2   = data2.get("props",{}).get("pageProps",{})
+                results["mrmed"] = {
+                    "status":         r2.status_code,
+                    "has_next_data":  True,
+                    "pageProps_keys": list(pp2.keys()),
+                    "sample":         str(pp2)[:500],
+                }
+            except Exception as e:
+                results["mrmed"] = {"status": r2.status_code, "error": str(e)}
+        else:
+            results["mrmed"] = {
+                "status":        r2.status_code,
+                "has_next_data": False,
+                "html_size":     len(r2.text),
+                "html_sample":   r2.text[:300],
+            }
+
+        # Test Flipkart Health+
+        fk_url = f"https://www.flipkart.com/search?q={q}&marketplace=HEALTH"
+        r3 = await client.get(fk_url, headers={"User-Agent": UA, "Accept-Language": "en-IN"})
+        results["flipkart_health"] = {
+            "status":    r3.status_code,
+            "html_size": len(r3.text),
+            "sample":    r3.text[:200],
+        }
+
+    return results
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
