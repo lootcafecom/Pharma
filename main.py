@@ -657,6 +657,58 @@ async def truemeds_test(q: str = Query(...)):
 
     return {"results": results}
 
+
+# ── Truemeds deep capture ─────────────────────────────────────────────────────
+@app.get("/api/truemeds2")
+async def truemeds2(q: str = Query(...)):
+    """Capture all Truemeds responses including POST and wait for search API"""
+    from playwright.async_api import async_playwright
+    captured = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True, args=[
+            "--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"
+        ])
+        ctx = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+            locale="en-IN", timezone_id="Asia/Kolkata"
+        )
+        await ctx.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot,ico}", lambda r: r.abort())
+
+        async def on_resp(resp):
+            try:
+                if resp.status not in (200, 201): return
+                ct = resp.headers.get("content-type","")
+                if "json" not in ct: return
+                data = await resp.json()
+                captured.append({
+                    "url":    resp.url[:120],
+                    "method": resp.request.method,
+                    "keys":   list(data.keys())[:10] if isinstance(data, dict) else type(data).__name__,
+                    "sample": str(data)[:400],
+                })
+            except Exception: pass
+
+        page = await ctx.new_page()
+        page.on("response", on_resp)
+
+        # Go to search page
+        try:
+            await page.goto(f"https://www.truemeds.in/search?query={q}",
+                           wait_until="networkidle", timeout=25000)
+        except Exception:
+            pass
+        await page.wait_for_timeout(5000)
+
+        # Scroll to trigger lazy loading
+        await page.evaluate("window.scrollTo(0, 500)")
+        await page.wait_for_timeout(3000)
+
+        await ctx.close()
+        await browser.close()
+
+    return {"total": len(captured), "responses": captured}
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
