@@ -768,6 +768,96 @@ async def truemeds3(q: str = Query(...)):
 
     return {"results": results}
 
+
+# ── Truemeds type-in search capture ──────────────────────────────────────────
+@app.get("/api/truemeds4")
+async def truemeds4(q: str = Query(...)):
+    """Type into Truemeds search box to trigger real search API"""
+    from playwright.async_api import async_playwright
+    captured = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True, args=[
+            "--no-sandbox","--disable-setuid-sandbox",
+            "--disable-dev-shm-usage","--disable-gpu"
+        ])
+        ctx = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+            locale="en-IN", timezone_id="Asia/Kolkata"
+        )
+        await ctx.route("**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot,ico}", lambda r: r.abort())
+
+        async def on_resp(resp):
+            try:
+                if resp.status not in (200,201): return
+                ct = resp.headers.get("content-type","")
+                if "json" not in ct: return
+                data = await resp.json()
+                url  = resp.url
+                # Skip known non-product URLs
+                if any(s in url for s in ["sentry","ipify","google","facebook","rudder","gtm"]):
+                    return
+                captured.append({
+                    "url":    url[:150],
+                    "method": resp.request.method,
+                    "keys":   list(data.keys())[:10] if isinstance(data,dict) else type(data).__name__,
+                    "sample": str(data)[:500],
+                })
+            except Exception: pass
+
+        page = await ctx.new_page()
+        page.on("response", on_resp)
+
+        # Go to homepage first
+        try:
+            await page.goto("https://www.truemeds.in", wait_until="domcontentloaded", timeout=20000)
+        except Exception: pass
+        await page.wait_for_timeout(2000)
+
+        # Find search input and type
+        try:
+            # Try common search input selectors
+            selectors = [
+                "input[placeholder*='Search']",
+                "input[placeholder*='search']",
+                "input[type='search']",
+                "input[name='search']",
+                "input[name='query']",
+                "[class*='search'] input",
+                "[class*='Search'] input",
+            ]
+            for sel in selectors:
+                try:
+                    await page.wait_for_selector(sel, timeout=3000)
+                    await page.click(sel)
+                    await page.type(sel, q, delay=100)
+                    await page.wait_for_timeout(3000)
+                    break
+                except Exception:
+                    continue
+        except Exception: pass
+
+        # Also try pressing Enter or clicking search button
+        try:
+            await page.keyboard.press("Enter")
+            await page.wait_for_timeout(4000)
+        except Exception: pass
+
+        # Navigate directly to search URL as fallback
+        try:
+            await page.goto(f"https://www.truemeds.in/search?query={q}",
+                           wait_until="domcontentloaded", timeout=20000)
+            await page.wait_for_timeout(5000)
+        except Exception: pass
+
+        await ctx.close()
+        await browser.close()
+
+    return {
+        "total":     len(captured),
+        "responses": captured
+    }
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
