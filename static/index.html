@@ -197,6 +197,7 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="pp"><div class="pd" style="background:#00a650"></div>NetMeds</div>
     <div class="pp"><div class="pd" style="background:#0072bc"></div>Apollo</div>
     <div class="pp"><div class="pd" style="background:#6c3baa"></div>MedKart</div>
+    <div class="pp"><div class="pd" style="background:#e87722"></div>Truemeds</div>
   </div>
 
   <!-- Results -->
@@ -260,13 +261,14 @@ footer a{color:var(--accent);text-decoration:none}
 // ── Config ────────────────────────────────────────────────────────────────────
 const API = window.location.origin;
 
-const PHARMACIES = ['PharmEasy','1mg','NetMeds','Apollo Pharmacy','MedKart'];
+const PHARMACIES = ['PharmEasy','1mg','NetMeds','Apollo Pharmacy','MedKart','Truemeds'];
 const META = {
   'PharmEasy':      {emoji:'🟠', color:'#fb6200', rating:'4.3★'},
   '1mg':            {emoji:'🔴', color:'#e8192c', rating:'4.5★'},
   'NetMeds':        {emoji:'🟢', color:'#00a650', rating:'4.2★'},
   'Apollo Pharmacy':{emoji:'🔵', color:'#0072bc', rating:'4.4★'},
   'MedKart':        {emoji:'🟣', color:'#6c3baa', rating:'4.1★'},
+  'Truemeds':       {emoji:'🟤', color:'#e87722', rating:'4.3★'},
 };
 
 let DATA = {}, currentSort = 'price';
