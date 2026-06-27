@@ -709,6 +709,65 @@ async def truemeds2(q: str = Query(...)):
 
     return {"total": len(captured), "responses": captured}
 
+
+# ── Truemeds search API hunt with real token ──────────────────────────────────
+@app.get("/api/truemeds3")
+async def truemeds3(q: str = Query(...)):
+    import httpx
+    from urllib.parse import quote
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    results = []
+
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+
+        # Step 1: Get real JWT token via POST
+        token = None
+        try:
+            r = await client.post(
+                "https://www.truemeds.in/api/getSessionToken",
+                headers={"User-Agent": UA, "Referer": "https://www.truemeds.in/",
+                         "Content-Type": "application/json", "Accept": "*/*"},
+                json={}
+            )
+            token = r.text.strip().strip('"')
+            results.append({"step":"token","status":r.status_code,"token":token[:60]})
+        except Exception as e:
+            results.append({"step":"token","error":str(e)})
+            return {"results": results}
+
+        if not token or "message" in token:
+            return {"error": "Token failed", "results": results}
+
+        h = {
+            "User-Agent":   UA,
+            "Accept":       "application/json",
+            "Referer":      "https://www.truemeds.in/",
+            "sessionToken": token,
+        }
+
+        # Step 2: Try all known Truemeds search endpoints
+        apis = [
+            f"https://nal.tmmumbai.in/ProductService/v4/searchProductsByName?name={quote(q)}&pageNo=0&pageSize=10&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v3/searchProductsByName?name={quote(q)}&pageNo=0&pageSize=10&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v2/searchMedicines?name={quote(q)}&pageNo=0&pageSize=10&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v1/getSearchResult?name={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/SearchService/v2/searchProducts?name={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/SearchService/searchProductsByName?name={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/CatalogService/v1/search?name={quote(q)}&sessionToken={token}",
+            f"https://nal.tmmumbai.in/ProductService/v3/getAlternativeProducts?name={quote(q)}&sessionToken={token}",
+        ]
+
+        for api in apis:
+            try:
+                r = await client.get(api, headers=h)
+                try: data = str(r.json())[:300]
+                except: data = r.text[:300]
+                results.append({"url":api[40:100],"status":r.status_code,"data":data})
+            except Exception as e:
+                results.append({"url":api[40:80],"error":str(e)})
+
+    return {"results": results}
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
