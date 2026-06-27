@@ -252,6 +252,66 @@ def parse_generic(resps, pharmacy, base_url, slug_base) -> dict:
             return {"pharmacy": pharmacy, "products": products, "searchUrl": base_url, "error": None}
     return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": "No products found"}
 
+
+# ── Truemeds ──────────────────────────────────────────────────────────────────
+async def fetch_truemeds(query: str) -> dict:
+    pharmacy = "Truemeds"
+    base_url = f"https://www.truemeds.in/search?query={query}"
+    import httpx
+    from urllib.parse import quote
+
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    h  = {"User-Agent": UA, "Referer": "https://www.truemeds.in/",
+          "Accept": "application/json", "Content-Type": "application/json"}
+
+    try:
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            # Step 1: Get session token via POST
+            tr = await client.post("https://www.truemeds.in/api/getSessionToken",
+                                   headers=h, json={})
+            token = tr.text.strip().strip('"')
+            if not token or len(token) < 20:
+                return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": "Token failed"}
+
+            # Step 2: Call confirmed search API
+            api = (
+                f"https://nal.tmmumbai.in/SearchService/getSearchResult"
+                f"?warehouseId=20"
+                f"&elasticSearchType=SKU_BRAND_SEARCH"
+                f"&searchString={quote(query)}"
+                f"&isMultiSearch=true"
+                f"&platform=D_WEB"
+                f"&versionName=TM_WEBSITE_V_4.25.9"
+                f"&sessionToken={token}"
+            )
+            sh = {**h, "sessionToken": token}
+            r  = await client.get(api, headers=sh)
+
+            if r.status_code != 200:
+                return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url,
+                        "error": f"API {r.status_code}"}
+
+            data  = r.json()
+            items = data.get("responseData", {}).get("elasticProductDetails", [])
+
+            products = []
+            for item in items[:5]:
+                p     = item.get("product", {})
+                name  = p.get("skuName") or p.get("productName") or ""
+                price = px(p.get("sellingPrice") or p.get("discountedPrice") or p.get("mrp"))
+                mrp   = px(p.get("mrp") or price)
+                code  = p.get("productCode") or ""
+                slug  = code.lower().replace("tm-tacr1-","") if code else ""
+                link  = f"https://www.truemeds.in/medicine-info/{slug}" if slug else base_url
+                prod  = mk(name, price, mrp, link)
+                if prod: products.append(prod)
+
+            return {"pharmacy": pharmacy, "products": products,
+                    "searchUrl": base_url, "error": None if products else "No products found"}
+
+    except Exception as e:
+        return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
+
 # ── FETCHERS list ─────────────────────────────────────────────────────────────
 FETCHERS = [
     ("PharmEasy",       fetch_pharmeasy),
@@ -259,6 +319,7 @@ FETCHERS = [
     ("NetMeds",         fetch_netmeds),
     ("Apollo Pharmacy", fetch_apollo),
     ("MedKart",         fetch_medkart),
+    ("Truemeds",        fetch_truemeds),
 ]
 
 # ── API Routes ────────────────────────────────────────────────────────────────
