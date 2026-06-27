@@ -301,8 +301,10 @@ async def fetch_truemeds(query: str) -> dict:
                 price = px(p.get("sellingPrice") or p.get("discountedPrice") or p.get("mrp"))
                 mrp   = px(p.get("mrp") or price)
                 code  = p.get("productCode") or ""
-                slug  = code.lower().replace("tm-tacr1-","") if code else ""
-                link  = f"https://www.truemeds.in/medicine-info/{slug}" if slug else base_url
+                # Build proper slug from skuName for correct URL
+                import re as _re
+                slug_name = _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") if name else ""
+                link  = f"https://www.truemeds.in/medicine-info/{slug_name}" if slug_name else base_url
                 prod  = mk(name, price, mrp, link)
                 if prod: products.append(prod)
 
@@ -313,6 +315,7 @@ async def fetch_truemeds(query: str) -> dict:
         return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
 
 # ── FETCHERS list ─────────────────────────────────────────────────────────────
+# All pharmacies — used for health check display only
 FETCHERS = [
     ("PharmEasy",       fetch_pharmeasy),
     ("1mg",             fetch_1mg),
@@ -321,6 +324,7 @@ FETCHERS = [
     ("MedKart",         fetch_medkart),
     ("Truemeds",        fetch_truemeds),
 ]
+ALL_PHARMACY_NAMES = [n for n,_ in FETCHERS]
 
 # ── API Routes ────────────────────────────────────────────────────────────────
 @app.get("/api/health")
@@ -347,12 +351,27 @@ async def compare(
 
     start = time.time()
 
-    # Run sequentially to avoid RAM overflow
-    # PharmEasy is HTTP-only so run it concurrently with first browser task
+    # Strategy: run HTTP-only fetchers concurrently, browser fetchers sequentially
+    # HTTP-only: PharmEasy, 1mg (after browser), Truemeds
+    # Browser-based: 1mg, NetMeds, Apollo, MedKart
     raw = []
-    for name, fn in FETCHERS:
+
+    # Group 1: HTTP-based (concurrent — fast)
+    http_fetchers  = [("PharmEasy", fetch_pharmeasy), ("Truemeds", fetch_truemeds)]
+    http_tasks     = [asyncio.wait_for(fn(q), timeout=20) for _, fn in http_fetchers]
+    http_results   = await asyncio.gather(*http_tasks, return_exceptions=True)
+    for (name, _), r in zip(http_fetchers, http_results):
+        if isinstance(r, Exception):
+            raw.append({"pharmacy": name, "products": [], "searchUrl": "", "error": str(r)})
+        else:
+            raw.append(r)
+
+    # Group 2: Browser-based (sequential — avoid RAM crash)
+    browser_fetchers = [("1mg", fetch_1mg), ("NetMeds", fetch_netmeds),
+                        ("Apollo Pharmacy", fetch_apollo), ("MedKart", fetch_medkart)]
+    for name, fn in browser_fetchers:
         try:
-            result = await asyncio.wait_for(fn(q), timeout=30)
+            result = await asyncio.wait_for(fn(q), timeout=35)
         except asyncio.TimeoutError:
             result = {"pharmacy": name, "products": [], "searchUrl": "", "error": "Timeout"}
         except Exception as e:
@@ -381,7 +400,7 @@ async def compare(
         "best_pharmacy": best_ph,
         "max_savings":   round(max_price - best_price, 2) if best_price and max_price > best_price else 0,
         "found_on":      found_on,
-        "total":         len(FETCHERS),
+        "total":         6,
         "time_taken":    round(time.time() - start, 2),
         "cached":        False,
     }
