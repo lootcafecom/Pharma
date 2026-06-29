@@ -1077,6 +1077,95 @@ async def truemeds4(q: str = Query(...)):
         "responses": captured
     }
 
+
+# ── Debug Jan Aushadhi + Sastasundar ─────────────────────────────────────────
+@app.get("/api/debugnew")
+async def debug_new(q: str = Query(...)):
+    import httpx, re as _re, json as _json
+    from urllib.parse import quote
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    results = {}
+
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+
+        # ── Jan Aushadhi ──────────────────────────────────────────────────────
+        ja_tests = []
+
+        # Test 1: Product list page
+        r = await client.get(
+            f"https://janaushadhi.gov.in/product-list.aspx?cat=0&search={quote(q)}",
+            headers={"User-Agent": UA, "Accept": "text/html"}
+        )
+        ja_tests.append({"url": "product-list.aspx", "status": r.status_code, "size": len(r.text), "sample": r.text[:300]})
+
+        # Test 2: Try PMBI API
+        r2 = await client.get(
+            f"https://pmbjpapi.janaushadhi.gov.in/api/ProductSearch?search={quote(q)}",
+            headers={"User-Agent": UA, "Accept": "application/json"}
+        )
+        try: d2 = str(r2.json())[:300]
+        except: d2 = r2.text[:300]
+        ja_tests.append({"url": "pmbjpapi/ProductSearch", "status": r2.status_code, "data": d2})
+
+        # Test 3: Another PMBI endpoint
+        r3 = await client.get(
+            f"https://pmbjpapi.janaushadhi.gov.in/api/product/getproductlistwithpagination?search={quote(q)}&pageindex=1&pagesize=10",
+            headers={"User-Agent": UA, "Accept": "application/json"}
+        )
+        try: d3 = str(r3.json())[:400]
+        except: d3 = r3.text[:300]
+        ja_tests.append({"url": "pmbjpapi/getproductlist", "status": r3.status_code, "data": d3})
+
+        # Test 4: Direct search
+        r4 = await client.get(
+            f"https://janaushadhi.gov.in/SearchProduct.aspx?search={quote(q)}",
+            headers={"User-Agent": UA, "Accept": "text/html"}
+        )
+        ja_tests.append({"url": "SearchProduct.aspx", "status": r4.status_code, "size": len(r4.text), "sample": r4.text[:400]})
+
+        results["jan_aushadhi"] = ja_tests
+
+        # ── Sastasundar ───────────────────────────────────────────────────────
+        ss_tests = []
+
+        # Test HTML page
+        r5 = await client.get(
+            f"https://www.sastasundar.com/search?q={quote(q)}",
+            headers={"User-Agent": UA, "Accept": "text/html"}
+        )
+        m = _re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r5.text, _re.DOTALL)
+        if m:
+            try:
+                data = _json.loads(m.group(1))
+                pp   = data.get("props",{}).get("pageProps",{})
+                ss_tests.append({"url": "search page", "status": r5.status_code,
+                                  "has_next_data": True, "pageProps_keys": list(pp.keys()),
+                                  "sample": str(pp)[:500]})
+            except Exception as e:
+                ss_tests.append({"url": "search page", "status": r5.status_code, "error": str(e)})
+        else:
+            ss_tests.append({"url": "search page", "status": r5.status_code,
+                              "has_next_data": False, "size": len(r5.text),
+                              "sample": r5.text[:300]})
+
+        # Test API endpoints
+        for api in [
+            f"https://www.sastasundar.com/api/v1/search?query={quote(q)}&limit=5",
+            f"https://www.sastasundar.com/api/medicine/search?q={quote(q)}",
+            f"https://api.sastasundar.com/search?q={quote(q)}",
+        ]:
+            try:
+                r = await client.get(api, headers={"User-Agent": UA, "Accept": "application/json"})
+                try: d = str(r.json())[:300]
+                except: d = r.text[:200]
+                ss_tests.append({"url": api[30:80], "status": r.status_code, "data": d})
+            except Exception as e:
+                ss_tests.append({"url": api[30:80], "error": str(e)})
+
+        results["sastasundar"] = ss_tests
+
+    return results
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
