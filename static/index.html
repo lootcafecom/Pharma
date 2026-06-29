@@ -146,7 +146,7 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="hero">
     <div class="hero-badge">🇮🇳 India's Medicine Price Tracker</div>
     <h1>Find the <span class="hl">Cheapest Price</span><br>for Any Medicine</h1>
-    <p>Live prices from 4 major Indian pharmacies. No ads. No bias. Save up to 50% on medicines.</p>
+    <p>Live prices from 6 Indian pharmacies including govt Jan Aushadhi. No ads. No bias. Save up to 80% on medicines.</p>
     <div class="search-wrap">
       <div class="search-row">
         <div class="search-box">
@@ -174,8 +174,8 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="pp"><div class="pd" style="background:#e8192c"></div>1mg</div>
     <div class="pp"><div class="pd" style="background:#0072bc"></div>Apollo</div>
     <div class="pp"><div class="pd" style="background:#e87722"></div>Truemeds</div>
-    <div class="pp" style="opacity:.5" title="Manual search only"><div class="pd" style="background:#00a650"></div>NetMeds*</div>
-    <div class="pp" style="opacity:.5" title="Manual search only"><div class="pd" style="background:#6c3baa"></div>MedKart*</div>
+    <div class="pp"><div class="pd" style="background:#138808"></div>Jan Aushadhi</div>
+    <div class="pp"><div class="pd" style="background:#f5a623"></div>Sastasundar</div>
   </div>
 
   <div id="results">
@@ -209,7 +209,6 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="grid" id="grid"></div>
     <div class="disclaimer">
       <strong>⚠️ Note:</strong> Prices are live and may vary by pincode, stock, or ongoing offers. Always verify before purchasing.
-      *NetMeds and MedKart show manual search links — their APIs are not publicly accessible.
       MedCompare is independent and not affiliated with any pharmacy.
     </div>
   </div>
@@ -232,21 +231,17 @@ footer a{color:var(--accent);text-decoration:none}
 <script>
 const API = window.location.origin;
 
-const PHARMACIES = ['PharmEasy','Truemeds','1mg','NetMeds','Apollo Pharmacy','MedKart'];
+const PHARMACIES = ['PharmEasy','Truemeds','1mg','Apollo Pharmacy','Jan Aushadhi','Sastasundar'];
 const META = {
   'PharmEasy':      {emoji:'🟠', color:'#fb6200', rating:'4.3★', live:true},
   '1mg':            {emoji:'🔴', color:'#e8192c', rating:'4.5★', live:true},
   'Apollo Pharmacy':{emoji:'🔵', color:'#0072bc', rating:'4.4★', live:true},
   'Truemeds':       {emoji:'🟤', color:'#e87722', rating:'4.3★', live:true},
-  'NetMeds':        {emoji:'🟢', color:'#00a650', rating:'4.2★', live:false},
-  'MedKart':        {emoji:'🟣', color:'#6c3baa', rating:'4.1★', live:false},
+  'Jan Aushadhi':   {emoji:'🏛️', color:'#138808', rating:'Govt★', live:true},
+  'Sastasundar':    {emoji:'🟡', color:'#f5a623', rating:'4.0★', live:true},
 };
 
-// Search URLs for manual fallback
-const SEARCH_URLS = {
-  'NetMeds': q => `https://www.netmeds.com/prescriptions/search-results?q=${encodeURIComponent(q)}`,
-  'MedKart': q => `https://www.medkart.in/search?q=${encodeURIComponent(q)}`,
-};
+
 
 let DATA = {}, currentSort = 'price', lastQuery = '';
 
@@ -258,21 +253,12 @@ function initCards() {
         <div><div class="pname">${n}</div><div class="prating">${META[n].rating}</div></div>
       </div>
       <div class="divl"></div>
-      ${META[n].live
-        ? '<div class="spin-c"></div>'
-        : `<div class="unavail">
-            <div class="uico">🔗</div>
-            <div class="utxt">Search manually on ${n}</div>
-            <a href="${SEARCH_URLS[n] ? SEARCH_URLS[n](lastQuery) : '#'}" target="_blank" rel="noopener" class="buy m">Search on ${n} →</a>
-           </div>`
-      }
+      <div class="spin-c"></div>
     </div>`).join('');
 }
 
 function renderCard(name, data) {
   const m  = META[name];
-  if (!m.live) return; // Manual-only pharmacies are pre-rendered
-
   const p0  = data?.products?.[0];
   const all = PHARMACIES.filter(n => META[n].live).map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
   const bp  = all.length ? Math.min(...all) : Infinity;
@@ -319,7 +305,7 @@ function renderCard(name, data) {
 }
 
 function updateBanner() {
-  const ok = PHARMACIES.filter(n => META[n].live && DATA[n]?.products?.[0]);
+  const ok = PHARMACIES.filter(n => DATA[n]?.products?.[0]);
   if (!ok.length) { document.getElementById('bb').style.display='none'; return; }
   const best = ok.reduce((a,b) => DATA[a].products[0].price < DATA[b].products[0].price ? a : b);
   const max  = ok.reduce((a,b) => DATA[a].products[0].price > DATA[b].products[0].price ? a : b);
@@ -330,10 +316,8 @@ function updateBanner() {
   document.getElementById('bp').textContent   = `₹${bp.toFixed(2)}`;
   document.getElementById('bs').textContent   = mp > bp
     ? `Save ₹${(mp-bp).toFixed(2)} vs highest price` : 'Lowest available price';
-  const done  = PHARMACIES.filter(n => META[n].live && DATA[n] !== undefined).length;
   const found = ok.length;
-  document.getElementById('rm').textContent =
-    `Found prices on ${found} of 4 live pharmacies${done < 4 ? ' · fetching more...' : ''}`;
+  document.getElementById('rm').textContent = `Found prices on ${found} of ${PHARMACIES.length} pharmacies`;
 }
 
 async function doSearch() {
@@ -365,14 +349,7 @@ async function doSearch() {
       renderCard(name, d);
     });
 
-    // Update manual search links with actual query
-    ['NetMeds','MedKart'].forEach(name => {
-      const card = document.getElementById('card-' + eid(name));
-      if (card) {
-        const link = card.querySelector('a');
-        if (link && SEARCH_URLS[name]) link.href = SEARCH_URLS[name](q);
-      }
-    });
+
 
     const tb = document.getElementById('timeBadge');
     tb.textContent  = `⏱ ${json.time_taken}s`;
@@ -397,10 +374,7 @@ function reorder() {
     const nb = b.id.replace('card-','').replace(/_/g,' ');
     const pa = DATA[na]?.products?.[0];
     const pb = DATA[nb]?.products?.[0];
-    // Manual pharmacies always go to end
-    if (!META[na]?.live && META[nb]?.live) return 1;
-    if (META[na]?.live && !META[nb]?.live) return -1;
-    if (currentSort==='price')    return (pa?.price??Infinity)-(pb?.price??Infinity);
+if (currentSort==='price')    return (pa?.price??Infinity)-(pb?.price??Infinity);
     if (currentSort==='discount') return (discPct(pb))-(discPct(pa));
     if (currentSort==='match')    return (pb?.match_score||0)-(pa?.match_score||0);
     return 0;
