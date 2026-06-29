@@ -173,50 +173,73 @@ async def fetch_1mg(query: str) -> dict:
 
 @app.get("/api/debugnew")
 async def debug_new(q: str = Query(...)):
-    import httpx
+    import httpx, re as _re, json as _json
     from urllib.parse import quote
     UA  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
     out = {}
 
     async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
-        h = {"User-Agent": UA, "Accept": "application/json"}
+        h    = {"User-Agent": UA, "Accept": "text/html,application/json"}
+        h_j  = {"User-Agent": UA, "Accept": "application/json"}
 
-        # Jan Aushadhi tests
+        # ── Jan Aushadhi — only use confirmed domain ──────────────────────────
         ja = []
-        urls = [
-            f"https://pmbjpapi.janaushadhi.gov.in/api/ProductSearch?search={quote(q)}",
-            f"https://pmbjpapi.janaushadhi.gov.in/api/product/getproductlistwithpagination?search={quote(q)}&pageindex=1&pagesize=10",
+        ja_urls = [
+            f"https://janaushadhi.gov.in/product-list.aspx?cat=0&search={quote(q)}",
             f"https://janaushadhi.gov.in/SearchProduct.aspx?search={quote(q)}",
+            f"https://janaushadhi.gov.in/ProductList.aspx?search={quote(q)}",
         ]
-        for u in urls:
+        for u in ja_urls:
             try:
                 r = await client.get(u, headers=h)
-                try:
-                    body = str(r.json())[:400]
-                except Exception:
-                    body = r.text[:300]
-                ja.append({"url": u[30:90], "status": r.status_code, "body": body})
+                ja.append({
+                    "url": u[30:90], "status": r.status_code,
+                    "size": len(r.text), "sample": r.text[:500]
+                })
             except Exception as e:
                 ja.append({"url": u[30:90], "error": str(e)})
         out["jan_aushadhi"] = ja
 
-        # Sastasundar tests
+        # ── Sastasundar — check what their site actually returns ───────────────
         ss = []
-        urls2 = [
-            f"https://www.sastasundar.com/search?q={quote(q)}",
-            f"https://www.sastasundar.com/api/v1/search?query={quote(q)}",
-            f"https://www.sastasundar.com/api/medicine/search?q={quote(q)}",
-        ]
-        for u in urls2:
+        try:
+            r = await client.get(
+                f"https://www.sastasundar.com/search?q={quote(q)}",
+                headers=h
+            )
+            m = _re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, _re.DOTALL)
+            if m:
+                data = _json.loads(m.group(1))
+                pp   = data.get("props",{}).get("pageProps",{})
+                ss.append({
+                    "url": "search page", "status": r.status_code,
+                    "has_next_data": True,
+                    "pageProps_keys": list(pp.keys()),
+                    "sample": str(pp)[:600]
+                })
+            else:
+                ss.append({
+                    "url": "search page", "status": r.status_code,
+                    "has_next_data": False,
+                    "size": len(r.text),
+                    "sample": r.text[:400]
+                })
+        except Exception as e:
+            ss.append({"url": "search page", "error": str(e)})
+
+        # Try Sastasundar API with same domain only
+        for api in [
+            f"https://www.sastasundar.com/api/search?q={quote(q)}",
+            f"https://www.sastasundar.com/api/products?search={quote(q)}",
+        ]:
             try:
-                r = await client.get(u, headers=h)
-                try:
-                    body = str(r.json())[:400]
-                except Exception:
-                    body = r.text[:300]
-                ss.append({"url": u[25:80], "status": r.status_code, "body": body})
+                r = await client.get(api, headers=h_j)
+                try: body = str(r.json())[:300]
+                except: body = r.text[:200]
+                ss.append({"url": api[30:70], "status": r.status_code, "body": body})
             except Exception as e:
-                ss.append({"url": u[25:80], "error": str(e)})
+                ss.append({"url": api[30:70], "error": str(e)})
+
         out["sastasundar"] = ss
 
     return out
