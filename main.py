@@ -314,17 +314,156 @@ async def fetch_truemeds(query: str) -> dict:
     except Exception as e:
         return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
 
+
+# ── Jan Aushadhi — Govt generic medicines ────────────────────────────────────
+async def fetch_janaushadhi(query: str) -> dict:
+    pharmacy = "Jan Aushadhi"
+    base_url = f"https://janaushadhi.gov.in/product-list.aspx"
+    import httpx
+    from urllib.parse import quote
+
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            # Jan Aushadhi search API
+            apis = [
+                f"https://janaushadhi.gov.in/api/ProductSearch?search={quote(query)}",
+                f"https://janaushadhi.gov.in/api/product/search?q={quote(query)}",
+                f"https://pmbjpapi.janaushadhi.gov.in/api/ProductSearch?search={quote(query)}",
+                f"https://pmbjpapi.janaushadhi.gov.in/api/product?search={quote(query)}&pageSize=10",
+            ]
+            h = {"User-Agent": UA, "Accept": "application/json",
+                 "Referer": "https://janaushadhi.gov.in/"}
+
+            for api in apis:
+                try:
+                    r = await client.get(api, headers=h)
+                    if r.status_code == 200:
+                        try:
+                            data = r.json()
+                        except Exception:
+                            continue
+                        items = find_list(data)
+                        if items:
+                            products = []
+                            for p in items[:5]:
+                                name  = next((p.get(f) for f in ["productName","name","ProductName","Name","genericName"] if p.get(f)), "")
+                                price = px(next((p.get(f) for f in ["price","mrp","Price","MRP","rate","Rate"] if p.get(f)), 0))
+                                mrp   = px(next((p.get(f) for f in ["mrp","MRP","maxRetailPrice"] if p.get(f)), price))
+                                prod  = mk(name, price, mrp, base_url)
+                                if prod: products.append(prod)
+                            if products:
+                                return {"pharmacy": pharmacy, "products": products, "searchUrl": api, "error": None}
+                except Exception:
+                    continue
+
+            # Fallback: scrape the product list page
+            search_url = f"https://janaushadhi.gov.in/product-list.aspx?cat=0&search={quote(query)}"
+            r = await client.get(search_url, headers={**h, "Accept": "text/html"})
+            html = r.text
+            import re as _re
+            # Extract product data from HTML table
+            rows = _re.findall(
+                r'<td[^>]*>([^<]*(?:tablet|capsule|syrup|injection)[^<]*)</td>.*?<td[^>]*>(\d+\.?\d*)</td>',
+                html, _re.IGNORECASE | _re.DOTALL
+            )
+            if rows:
+                products = []
+                for name, price in rows[:5]:
+                    prod = mk(name.strip(), price, price, search_url)
+                    if prod: products.append(prod)
+                if products:
+                    return {"pharmacy": pharmacy, "products": products, "searchUrl": search_url, "error": None}
+
+    except Exception as e:
+        return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
+
+    return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": "No products found"}
+
+
+# ── Sastasundar ───────────────────────────────────────────────────────────────
+async def fetch_sastasundar(query: str) -> dict:
+    pharmacy = "Sastasundar"
+    base_url = f"https://www.sastasundar.com/search?q={query}"
+    import httpx, re as _re, json as _json
+    from urllib.parse import quote
+
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            h = {"User-Agent": UA, "Accept-Language": "en-IN",
+                 "Referer": "https://www.sastasundar.com/"}
+
+            # Try API first
+            apis = [
+                f"https://www.sastasundar.com/api/search?q={quote(query)}&limit=10",
+                f"https://www.sastasundar.com/api/v1/search?query={quote(query)}",
+                f"https://api.sastasundar.com/v1/products/search?q={quote(query)}",
+            ]
+            for api in apis:
+                try:
+                    r = await client.get(api, headers={**h, "Accept":"application/json"})
+                    if r.status_code == 200 and "json" in r.headers.get("content-type",""):
+                        data  = r.json()
+                        items = find_list(data)
+                        if items:
+                            products = []
+                            for p in items[:5]:
+                                name  = next((p.get(f) for f in ["name","productName","title"] if p.get(f)), "")
+                                price = px(next((p.get(f) for f in ["selling_price","sellingPrice","price","offer_price"] if p.get(f)), 0))
+                                mrp   = px(next((p.get(f) for f in ["mrp","MRP","max_retail_price"] if p.get(f)), price))
+                                slug  = next((str(p.get(f)) for f in ["slug","id","product_id"] if p.get(f)), "")
+                                link  = f"https://www.sastasundar.com/product/{slug}" if slug else base_url
+                                prod  = mk(name, price, mrp, link)
+                                if prod: products.append(prod)
+                            if products:
+                                return {"pharmacy": pharmacy, "products": products, "searchUrl": api, "error": None}
+                except Exception:
+                    continue
+
+            # HTML scraping fallback
+            r    = await client.get(base_url, headers={**h, "Accept":"text/html"})
+            html = r.text
+
+            # Try __NEXT_DATA__
+            m = _re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, _re.DOTALL)
+            if m:
+                try:
+                    data  = _json.loads(m.group(1))
+                    pp    = data.get("props",{}).get("pageProps",{})
+                    items = find_list(pp)
+                    if items:
+                        products = []
+                        for p in items[:5]:
+                            name  = next((p.get(f) for f in ["name","productName","title"] if p.get(f)), "")
+                            price = px(next((p.get(f) for f in ["selling_price","sellingPrice","price"] if p.get(f)), 0))
+                            mrp   = px(next((p.get(f) for f in ["mrp","MRP"] if p.get(f)), price))
+                            slug  = next((str(p.get(f)) for f in ["slug","id"] if p.get(f)), "")
+                            link  = f"https://www.sastasundar.com/product/{slug}" if slug else base_url
+                            prod  = mk(name, price, mrp, link)
+                            if prod: products.append(prod)
+                        if products:
+                            return {"pharmacy": pharmacy, "products": products, "searchUrl": base_url, "error": None}
+                except Exception:
+                    pass
+
+    except Exception as e:
+        return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
+
+    return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": "No products found"}
+
 # ── FETCHERS list ─────────────────────────────────────────────────────────────
-# All pharmacies — used for health check display only
+# Active pharmacies
 FETCHERS = [
     ("PharmEasy",       fetch_pharmeasy),
     ("1mg",             fetch_1mg),
-    ("NetMeds",         fetch_netmeds),
     ("Apollo Pharmacy", fetch_apollo),
-    ("MedKart",         fetch_medkart),
     ("Truemeds",        fetch_truemeds),
+    ("Jan Aushadhi",    fetch_janaushadhi),
+    ("Sastasundar",     fetch_sastasundar),
 ]
-ALL_PHARMACY_NAMES = [n for n,_ in FETCHERS]
 
 # ── API Routes ────────────────────────────────────────────────────────────────
 @app.get("/api/health")
@@ -357,7 +496,8 @@ async def compare(
     raw = []
 
     # Group 1: HTTP-based (concurrent — fast)
-    http_fetchers  = [("PharmEasy", fetch_pharmeasy), ("Truemeds", fetch_truemeds)]
+    http_fetchers  = [("PharmEasy", fetch_pharmeasy), ("Truemeds", fetch_truemeds),
+                      ("Jan Aushadhi", fetch_janaushadhi), ("Sastasundar", fetch_sastasundar)]
     http_tasks     = [asyncio.wait_for(fn(q), timeout=20) for _, fn in http_fetchers]
     http_results   = await asyncio.gather(*http_tasks, return_exceptions=True)
     for (name, _), r in zip(http_fetchers, http_results):
@@ -367,8 +507,7 @@ async def compare(
             raw.append(r)
 
     # Group 2: Browser-based (sequential — avoid RAM crash)
-    browser_fetchers = [("1mg", fetch_1mg), ("NetMeds", fetch_netmeds),
-                        ("Apollo Pharmacy", fetch_apollo), ("MedKart", fetch_medkart)]
+    browser_fetchers = [("1mg", fetch_1mg), ("Apollo Pharmacy", fetch_apollo)]
     for name, fn in browser_fetchers:
         try:
             result = await asyncio.wait_for(fn(q), timeout=35)
@@ -400,7 +539,7 @@ async def compare(
         "best_pharmacy": best_ph,
         "max_savings":   round(max_price - best_price, 2) if best_price and max_price > best_price else 0,
         "found_on":      found_on,
-        "total":         6,
+        "total":         len(FETCHERS),
         "time_taken":    round(time.time() - start, 2),
         "cached":        False,
     }
