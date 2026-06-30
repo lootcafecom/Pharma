@@ -254,33 +254,63 @@ async def fetch_1mg(query: str) -> dict:
             "searchUrl": url, "error": None if products else "No products found"}
 
 
-# ── Apollo — Browser XHR capture (extended wait) ──────────────────────────────
+# ── Apollo — Fresh standalone browser (this is what worked originally) ───────
 async def fetch_apollo(query: str) -> dict:
     pharmacy = "Apollo Pharmacy"
     url      = f"https://www.apollopharmacy.in/search-medicines/{query}"
+    from playwright.async_api import async_playwright
 
-    async def wait_load(page):
-        if pincode := None:  # placeholder for future pincode support
-            pass
+    captured = []
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox", "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage", "--disable-gpu",
+                "--disable-blink-features=AutomationControlled",
+            ]
+        )
         try:
-            await page.wait_for_selector(
-                "[class*='ProductCard'],[class*='medicine-card'],[class*='MedicineCard'],[class*='product-card']",
-                timeout=10000
+            ctx = await browser.new_context(
+                user_agent=BASE_HEADERS["User-Agent"],
+                locale="en-IN", timezone_id="Asia/Kolkata",
             )
-        except Exception:
-            pass
-        # Always wait extra time regardless — XHR may complete after selector appears
-        await page.wait_for_timeout(3000)
-        # Scroll to trigger any lazy loaded content
-        try:
-            await page.evaluate("window.scrollTo(0, 600)")
-            await page.wait_for_timeout(2000)
-        except Exception:
-            pass
+            await ctx.route(
+                "**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot,ico}",
+                lambda r: r.abort()
+            )
 
-    resps    = await browser_capture(url, 10000, wait_load)
+            async def on_resp(resp):
+                try:
+                    if resp.status != 200: return
+                    if "json" not in resp.headers.get("content-type",""): return
+                    data = await resp.json()
+                    if data: captured.append({"url": resp.url, "data": data})
+                except Exception: pass
+
+            page = await ctx.new_page()
+            page.on("response", on_resp)
+
+            try:
+                await page.goto(url, wait_until="domcontentloaded", timeout=25000)
+            except Exception: pass
+
+            try:
+                await page.wait_for_selector(
+                    "[class*='ProductCard'],[class*='medicine-card'],[class*='MedicineCard']",
+                    timeout=8000
+                )
+            except Exception:
+                await page.wait_for_timeout(4000)
+
+            await page.wait_for_timeout(8000)
+            await ctx.close()
+        finally:
+            await browser.close()
+
     products = []
-    for resp in resps:
+    for resp in captured:
         items = find_list(resp.get("data", {}))
         if not items: continue
         for p in items[:5]:
@@ -294,7 +324,7 @@ async def fetch_apollo(query: str) -> dict:
         if products: break
 
     return {"pharmacy": pharmacy, "products": products,
-            "searchUrl": url, "error": None if products else f"No products found ({len(resps)} responses captured)"}
+            "searchUrl": url, "error": None if products else f"No products found ({len(captured)} responses)"}
 
 
 # ── Compare engine ────────────────────────────────────────────────────────────
@@ -386,6 +416,7 @@ async def popular():
 @app.delete("/api/cache")
 async def clear_cache():
     cache.clear(); return {"message": "Cache cleared"}
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
