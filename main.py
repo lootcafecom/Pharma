@@ -166,7 +166,7 @@ async def fetch_pharmeasy(query: str) -> dict:
                     price = p.get("salePriceDecimal") or p.get("sellingPrice") or p.get("price")
                     mrp   = p.get("mrpDecimal") or p.get("mrp") or price
                     slug  = p.get("slug") or p.get("urlKey") or ""
-                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/medicines/all/{slug}")
+                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}")
                     if prod: products.append(prod)
                 if products:
                     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None}
@@ -210,8 +210,11 @@ async def fetch_truemeds(query: str) -> dict:
                 name  = p.get("skuName") or p.get("productName") or ""
                 price = px(p.get("sellingPrice") or p.get("discountedPrice") or p.get("mrp"))
                 mrp   = px(p.get("mrp") or price)
-                slug  = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") if name else ""
-                prod  = mk(name, price, mrp, f"https://www.truemeds.in/medicine-info/{slug}")
+                # Truemeds product page slugs include marketing text we can't
+                # reliably reconstruct from the API alone (e.g. "...-mg-tablet-..."),
+                # so link to a pre-filled search instead of guessing a 404-prone URL.
+                link = f"https://www.truemeds.in/search?query={quote(name)}" if name else base_url
+                prod  = mk(name, price, mrp, link)
                 if prod: products.append(prod)
 
             return {"pharmacy": pharmacy, "products": products,
