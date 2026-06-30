@@ -254,21 +254,31 @@ async def fetch_1mg(query: str) -> dict:
             "searchUrl": url, "error": None if products else "No products found"}
 
 
-# ── Apollo — Browser XHR capture ─────────────────────────────────────────────
+# ── Apollo — Browser XHR capture (extended wait) ──────────────────────────────
 async def fetch_apollo(query: str) -> dict:
     pharmacy = "Apollo Pharmacy"
     url      = f"https://www.apollopharmacy.in/search-medicines/{query}"
 
     async def wait_load(page):
+        if pincode := None:  # placeholder for future pincode support
+            pass
         try:
             await page.wait_for_selector(
-                "[class*='ProductCard'],[class*='medicine-card'],[class*='MedicineCard']",
-                timeout=8000
+                "[class*='ProductCard'],[class*='medicine-card'],[class*='MedicineCard'],[class*='product-card']",
+                timeout=10000
             )
         except Exception:
-            await page.wait_for_timeout(4000)
+            pass
+        # Always wait extra time regardless — XHR may complete after selector appears
+        await page.wait_for_timeout(3000)
+        # Scroll to trigger any lazy loaded content
+        try:
+            await page.evaluate("window.scrollTo(0, 600)")
+            await page.wait_for_timeout(2000)
+        except Exception:
+            pass
 
-    resps    = await browser_capture(url, 8000, wait_load)
+    resps    = await browser_capture(url, 10000, wait_load)
     products = []
     for resp in resps:
         items = find_list(resp.get("data", {}))
@@ -284,7 +294,7 @@ async def fetch_apollo(query: str) -> dict:
         if products: break
 
     return {"pharmacy": pharmacy, "products": products,
-            "searchUrl": url, "error": None if products else "No products found"}
+            "searchUrl": url, "error": None if products else f"No products found ({len(resps)} responses captured)"}
 
 
 # ── Compare engine ────────────────────────────────────────────────────────────
