@@ -227,11 +227,11 @@ async def fetch_1mg(query: str) -> dict:
     found    = {}
 
     async def scroll(page):
-        await page.wait_for_timeout(2000)
+        await page.wait_for_timeout(1200)
         await page.evaluate("window.scrollTo(0, 300)")
-        await page.wait_for_timeout(1500)
+        await page.wait_for_timeout(800)
 
-    resps = await browser_capture(url, 7000, scroll)
+    resps = await browser_capture(url, 4500, scroll)
 
     for r in resps:
         if "search/all" in r["url"] and "pwa-dweb-api" in r["url"]:
@@ -299,12 +299,14 @@ async def fetch_apollo(query: str) -> dict:
             try:
                 await page.wait_for_selector(
                     "[class*='ProductCard'],[class*='medicine-card'],[class*='MedicineCard']",
-                    timeout=8000
+                    timeout=6000
                 )
+                # Selector found fast — short settle time is enough
+                await page.wait_for_timeout(2500)
             except Exception:
-                await page.wait_for_timeout(4000)
+                # Selector never appeared — give XHR more time as fallback
+                await page.wait_for_timeout(5000)
 
-            await page.wait_for_timeout(8000)
             await ctx.close()
         finally:
             await browser.close()
@@ -357,7 +359,7 @@ async def compare(medicine: str = Query(..., min_length=1), pincode: str = Query
     start = time.time()
 
     # Run HTTP fetchers concurrently (fast — no browser)
-    http_tasks   = [asyncio.wait_for(fn(q), timeout=20) for _, fn in HTTP_FETCHERS]
+    http_tasks   = [asyncio.wait_for(fn(q), timeout=12) for _, fn in HTTP_FETCHERS]
     http_results = await asyncio.gather(*http_tasks, return_exceptions=True)
 
     raw = []
@@ -370,7 +372,7 @@ async def compare(medicine: str = Query(..., min_length=1), pincode: str = Query
     # Run browser fetchers sequentially (avoid RAM crash)
     for name, fn in BROWSER_FETCHERS:
         try:
-            result = await asyncio.wait_for(fn(q), timeout=35)
+            result = await asyncio.wait_for(fn(q), timeout=22)
         except asyncio.TimeoutError:
             result = {"pharmacy": name, "products": [], "searchUrl": "", "error": "Timeout"}
         except Exception as e:
