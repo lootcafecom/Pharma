@@ -177,7 +177,8 @@ async def fetch_pharmeasy(query: str) -> dict:
 # ── Truemeds — JWT token + search API ────────────────────────────────────────
 async def fetch_truemeds(query: str) -> dict:
     pharmacy = "Truemeds"
-    base_url = f"https://www.truemeds.in/search?query={query}"
+    from urllib.parse import quote
+    base_url = f"https://www.truemeds.in/search?query={quote(query)}"
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
             h = {"User-Agent": BASE_HEADERS["User-Agent"],
