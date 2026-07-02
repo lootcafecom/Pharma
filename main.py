@@ -211,10 +211,24 @@ async def fetch_truemeds(query: str) -> dict:
                 name  = p.get("skuName") or p.get("productName") or ""
                 price = px(p.get("sellingPrice") or p.get("discountedPrice") or p.get("mrp"))
                 mrp   = px(p.get("mrp") or price)
-                # Truemeds product page slugs include marketing text we can't
-                # reliably reconstruct from the API alone (e.g. "...-mg-tablet-..."),
-                # so link to a pre-filled search instead of guessing a 404-prone URL.
-                link = f"https://www.truemeds.in/search?query={quote(name)}" if name else base_url
+                # Build Truemeds URL using productCode (e.g. TM-TACR1-011691)
+                # URL pattern: /otc/{name-slug}-{code-lowercase}
+                # We get the urlSlug from API if available, else build from skuSlug
+                url_slug = p.get("urlSlug") or p.get("skuSlug") or p.get("slug") or ""
+                code     = p.get("productCode") or ""
+                code_slug = code.lower() if code else ""
+
+                if url_slug and code_slug:
+                    # Use provided slug directly
+                    link = f"https://www.truemeds.in/otc/{url_slug}-{code_slug}"
+                elif code_slug:
+                    # Build slug from name + code
+                    import re as _re
+                    name_slug = _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+                    link = f"https://www.truemeds.in/otc/{name_slug}-{code_slug}"
+                else:
+                    # Safe fallback to search
+                    link = f"https://www.truemeds.in/search?query={quote(name)}"
                 prod  = mk(name, price, mrp, link)
                 if prod: products.append(prod)
 
@@ -424,6 +438,36 @@ async def clear_cache():
     cache.clear(); return {"message": "Cache cleared"}
 
 
+
+@app.get("/api/truemedsfields")
+async def truemeds_fields(q: str = Query(...)):
+    """Show all fields returned by Truemeds API for first product"""
+    import httpx
+    from urllib.parse import quote
+    UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36"
+    h  = {"User-Agent": UA, "Referer": "https://www.truemeds.in/",
+          "Accept": "application/json", "Content-Type": "application/json"}
+
+    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+        tr    = await client.post("https://www.truemeds.in/api/getSessionToken", headers=h, json={})
+        token = tr.text.strip().strip('"')
+        api   = (
+            f"https://nal.tmmumbai.in/SearchService/getSearchResult"
+            f"?warehouseId=20&elasticSearchType=SKU_BRAND_SEARCH"
+            f"&searchString={quote(q)}&isMultiSearch=true"
+            f"&platform=D_WEB&versionName=TM_WEBSITE_V_4.25.9"
+            f"&sessionToken={token}"
+        )
+        r     = await client.get(api, headers={**h, "sessionToken": token})
+        items = r.json().get("responseData", {}).get("elasticProductDetails", [])
+        if not items:
+            return {"error": "No products found"}
+        # Return ALL fields of first product
+        first = items[0].get("product", {})
+        return {"all_fields": first, "url_related": {
+            k: v for k, v in first.items()
+            if any(x in k.lower() for x in ["slug","url","link","code","path","id"])
+        }}
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
