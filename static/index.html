@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedCompare India — Live Medicine Price Comparison</title>
-<meta name="description" content="Compare medicine prices across PharmEasy, 1mg, Apollo, Truemeds instantly.">
+<title>MedCompare India — Compare Medicine Prices</title>
+<meta name="description" content="Compare medicine prices across PharmEasy, 1mg, Apollo, Truemeds. Find cheapest price instantly.">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -13,93 +13,133 @@
   --text:#e8f0fe;--muted:#6b7fa3;--warning:#ffb800;--danger:#ff4757;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.wrap{max-width:1000px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
-header{padding:18px 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,15,30,.95);backdrop-filter:blur(10px);z-index:100}
-.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.logo-text{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--text)}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+/* Header */
+header{padding:16px 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,15,30,.95);backdrop-filter:blur(10px);z-index:100}
+.hdr{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text)}
 .logo-text span{color:var(--accent)}
-.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:20px;padding:4px 11px;font-size:11px;color:var(--accent)}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--accent)}
 .ldot{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.hero{padding:48px 0 32px;text-align:center}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,153,255,.1);border:1px solid rgba(0,153,255,.2);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--accent2);margin-bottom:18px;letter-spacing:.5px;text-transform:uppercase}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,48px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Hero */
+.hero{padding:44px 0 28px;text-align:center}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(24px,4.5vw,46px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:10px}
 .hl{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{color:var(--muted);font-size:15px;max-width:460px;margin:0 auto 32px;line-height:1.6}
-.search-wrap{max-width:600px;margin:0 auto}
-.search-box{display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;margin-bottom:10px}
-.search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,170,.1)}
-.si{padding:0 14px;display:flex;align-items:center;color:var(--muted);font-size:16px}
-#inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:14px 0;min-width:0}
+.hero p{color:var(--muted);font-size:14px;margin-bottom:28px}
+
+/* Search */
+.search-wrap{max-width:580px;margin:0 auto}
+.sbox{display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}
+.sbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,170,.1)}
+.si{padding:0 14px;color:var(--muted);font-size:16px;display:flex;align-items:center}
+#inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;padding:14px 0;font-family:'DM Sans',sans-serif}
 #inp::placeholder{color:var(--muted)}
-#btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s}
+#btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:0 22px;cursor:pointer;white-space:nowrap;transition:opacity .2s}
 #btn:hover{opacity:.9}
 #btn:disabled{opacity:.5;cursor:not-allowed}
-.tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-.tag{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tag{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
 .tag:hover{border-color:var(--accent);color:var(--accent)}
-.platforms{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:16px 0 4px}
-.pp{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--muted)}
-.pd{width:6px;height:6px;border-radius:50%}
-#results{display:none;padding:28px 0}
-.rh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
-.rtitle{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
-.rtitle span{color:var(--accent)}
-.rmeta{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tbadge{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:10px}
-.cbadge{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.3);border-radius:5px;padding:2px 7px;font-size:10px;color:var(--warning)}
-.sort-bar{display:flex;gap:6px}
-.sb{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 11px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
-.sb.active,.sb:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.05)}
-.best-banner{background:linear-gradient(135deg,rgba(0,212,170,.08),rgba(0,153,255,.08));border:1px solid rgba(0,212,170,.25);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;animation:bannerIn .35s ease}
-@keyframes bannerIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.bl{display:flex;align-items:center;gap:12px}
-.blabel{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:600}
-.bname{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
-.bprice{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent)}
-.bsave{font-size:11px;color:var(--muted);margin-top:2px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px;transition:all .3s;position:relative;overflow:hidden;animation:fadeUp .4s ease forwards;opacity:0;transform:translateY(12px)}
-@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-.card:hover{border-color:rgba(0,212,170,.35);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,170,.07)}
-.card.best{border-color:var(--accent);background:linear-gradient(135deg,rgba(0,212,170,.04),var(--surface))}
-.best-tag{position:absolute;top:10px;right:10px;background:var(--accent);color:#000;font-size:8px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.5px}
-.ctop{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.plogo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.pname{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
-.prating{font-size:10px;color:var(--warning);margin-top:1px}
-.divl{height:1px;background:var(--border);margin:10px 0}
-.prod-name{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4;min-height:30px}
-.mscore{display:inline-block;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.2);border-radius:4px;padding:1px 5px;font-size:9px;color:var(--accent);margin-bottom:8px}
-.price-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
-.pmain{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1}
-.pmrp{font-size:10px;color:var(--muted);text-decoration:line-through;margin-bottom:2px}
-.disc{background:rgba(255,107,53,.12);color:var(--accent3);border:1px solid rgba(255,107,53,.25);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600}
-.buy{width:100%;padding:10px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:block;text-align:center}
-.buy.p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.buy.s{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.buy:hover{opacity:.88;transform:translateY(-1px)}
-.unavail{text-align:center;padding:6px 0}
-.uico{font-size:20px;margin-bottom:6px}
-.utxt{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4}
-.loading-state{text-align:center;padding:4px 0}
-.spin-c{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;margin:10px auto 8px}
-.loading-label{font-size:10px;color:var(--muted)}
+
+/* Results section */
+#results{display:none;padding:24px 0}
+
+/* Medicine title row */
+.med-title{margin-bottom:20px}
+.med-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.med-name span{color:var(--accent)}
+.med-meta{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tbadge{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:10px}
+.cbadge{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--warning)}
+
+/* Best deal highlight */
+.best-deal{background:linear-gradient(135deg,rgba(0,212,170,.1),rgba(0,153,255,.07));border:1.5px solid rgba(0,212,170,.3);border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;animation:slideDown .3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.bd-left{display:flex;align-items:center;gap:14px}
+.bd-icon{font-size:28px}
+.bd-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700;margin-bottom:3px}
+.bd-pharmacy{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.bd-product{font-size:12px;color:var(--muted);margin-top:2px}
+.bd-price{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent);line-height:1}
+.bd-savings{font-size:12px;color:var(--muted);margin-top:3px;text-align:right}
+.bd-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:9px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s;white-space:nowrap}
+.bd-btn:hover{opacity:.88}
+
+/* Comparison table */
+.compare-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.compare-table th{background:var(--surface2);padding:10px 14px;font-size:11px;font-weight:600;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.compare-table th:nth-child(2),.compare-table td:nth-child(2){text-align:right}
+.compare-table th:nth-child(3),.compare-table td:nth-child(3){text-align:right}
+.compare-table th:nth-child(4),.compare-table td:nth-child(4){text-align:center}
+.compare-table th:last-child,.compare-table td:last-child{text-align:center}
+.compare-table tr.data-row{border-bottom:1px solid var(--border);transition:background .2s}
+.compare-table tr.data-row:hover{background:rgba(255,255,255,.02)}
+.compare-table tr.data-row.best-row{background:rgba(0,212,170,.04)}
+.compare-table td{padding:12px 14px;font-size:13px;vertical-align:middle}
+
+/* Pharmacy cell */
+.ph-cell{display:flex;align-items:center;gap:9px}
+.ph-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ph-name{font-weight:600;font-size:13px}
+.ph-rating{font-size:10px;color:var(--warning);display:block;margin-top:1px}
+.best-badge{background:var(--accent);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:6px;letter-spacing:.3px}
+
+/* Price cells */
+.price-cell{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.price-cell.best{color:var(--accent)}
+.mrp-cell{font-size:12px;color:var(--muted);text-decoration:line-through}
+.disc-cell{font-size:11px;font-weight:600;color:var(--accent3)}
+
+/* Action cell */
+.buy-link{display:inline-block;padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-decoration:none;transition:all .2s;white-space:nowrap}
+.buy-link.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.buy-link.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.buy-link:hover{opacity:.85;transform:translateY(-1px)}
+
+/* Loading row */
+.loading-row td{padding:14px;color:var(--muted);font-size:12px}
+.spin-inline{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes sp{to{transform:rotate(360deg)}}
-.disclaimer{background:rgba(255,184,0,.04);border:1px solid rgba(255,184,0,.18);border-radius:8px;padding:10px 13px;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5}
+
+/* Not found row */
+.nf-row td{padding:12px 14px;color:var(--muted);font-size:12px;font-style:italic}
+
+/* Skeleton shimmer */
+.skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Sort bar */
+.tbl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.tbl-title{font-size:12px;color:var(--muted);font-weight:500}
+.sort-bar{display:flex;gap:5px}
+.sb{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.sb.active,.sb:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.05)}
+
+.disclaimer{background:rgba(255,184,0,.04);border:1px solid rgba(255,184,0,.15);border-radius:8px;padding:10px 13px;font-size:11px;color:var(--muted);line-height:1.5}
 .disclaimer strong{color:var(--warning)}
-.popular-section{padding:24px 0 0}
-.section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;color:var(--muted)}
-.popular-grid{display:flex;gap:7px;flex-wrap:wrap}
-.pop-item{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
+
+.popular-section{padding:20px 0 0}
+.section-title{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.popular-grid{display:flex;gap:6px;flex-wrap:wrap}
+.pop-item{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
 .pop-item:hover{border-color:var(--accent);color:var(--accent)}
-footer{border-top:1px solid var(--border);padding:18px 0;margin-top:44px;text-align:center;color:var(--muted);font-size:11px;line-height:1.8}
+
+footer{border-top:1px solid var(--border);padding:16px 0;margin-top:40px;text-align:center;color:var(--muted);font-size:11px}
 footer a{color:var(--accent);text-decoration:none}
-@media(max-width:600px){.hero h1{font-size:24px}.grid{grid-template-columns:1fr}.rh{flex-direction:column}}
+
+@media(max-width:600px){
+  .hero h1{font-size:22px}
+  .compare-table th:nth-child(3),.compare-table td:nth-child(3){display:none}
+  .best-deal{flex-direction:column;align-items:flex-start}
+  .bd-price{font-size:26px}
+}
 </style>
 </head>
 <body>
@@ -118,15 +158,14 @@ footer a{color:var(--accent);text-decoration:none}
 <main>
 <div class="wrap">
   <div class="hero">
-    <div class="hero-badge">🇮🇳 India's Medicine Price Tracker</div>
-    <h1>Find the <span class="hl">Cheapest Price</span><br>for Any Medicine</h1>
-    <p>Live prices from 4 major Indian pharmacies. No ads. No bias. Just savings.</p>
+    <h1>Compare <span class="hl">Medicine Prices</span> Instantly</h1>
+    <p>Live prices from PharmEasy, 1mg, Apollo & Truemeds — no ads, no bias</p>
     <div class="search-wrap">
-      <div class="search-box">
+      <div class="sbox">
         <div class="si">🔍</div>
         <input type="text" id="inp" placeholder="Search medicine e.g. Dolo 650, Metformin, Crocin..." autocomplete="off"/>
+        <button id="btn" onclick="doSearch()">Compare</button>
       </div>
-      <button id="btn" onclick="doSearch()">Compare Prices</button>
       <div class="tags">
         <span class="tag" onclick="qs('Dolo 650')">Dolo 650</span>
         <span class="tag" onclick="qs('Crocin 500')">Crocin 500</span>
@@ -134,46 +173,62 @@ footer a{color:var(--accent);text-decoration:none}
         <span class="tag" onclick="qs('Azithromycin 500')">Azithromycin</span>
         <span class="tag" onclick="qs('Pantoprazole 40')">Pantoprazole</span>
         <span class="tag" onclick="qs('Vitamin D3')">Vitamin D3</span>
+        <span class="tag" onclick="qs('Amoxicillin 500')">Amoxicillin</span>
+        <span class="tag" onclick="qs('Atorvastatin 10')">Atorvastatin</span>
       </div>
     </div>
   </div>
 
-  <div class="platforms">
-    <span style="font-size:11px;color:var(--muted)">Comparing:</span>
-    <div class="pp"><div class="pd" style="background:#fb6200"></div>PharmEasy</div>
-    <div class="pp"><div class="pd" style="background:#e87722"></div>Truemeds</div>
-    <div class="pp"><div class="pd" style="background:#e8192c"></div>1mg</div>
-    <div class="pp"><div class="pd" style="background:#0072bc"></div>Apollo</div>
-  </div>
-
   <div id="results">
-    <div class="rh">
-      <div>
-        <div class="rtitle">Results for "<span id="qt"></span>"</div>
-        <div class="rmeta">
-          <span id="rm">Checking 4 pharmacies...</span>
-          <span class="tbadge" id="timeBadge" style="display:none"></span>
-          <span class="cbadge" id="cacheBadge" style="display:none">⚡ Cached</span>
+    <!-- Medicine title -->
+    <div class="med-title">
+      <div class="med-name">Results for "<span id="qt"></span>"</div>
+      <div class="med-meta">
+        <span id="rm">Checking pharmacies...</span>
+        <span class="tbadge" id="timeBadge" style="display:none"></span>
+        <span class="cbadge" id="cacheBadge" style="display:none">⚡ Cached</span>
+      </div>
+    </div>
+
+    <!-- Best deal banner -->
+    <div id="bestDeal" style="display:none" class="best-deal">
+      <div class="bd-left">
+        <div class="bd-icon">🏆</div>
+        <div>
+          <div class="bd-label">Best Price Found</div>
+          <div class="bd-pharmacy" id="bdPharmacy"></div>
+          <div class="bd-product" id="bdProduct"></div>
         </div>
       </div>
+      <div style="text-align:right">
+        <div class="bd-price" id="bdPrice"></div>
+        <div class="bd-savings" id="bdSavings"></div>
+      </div>
+      <a href="#" id="bdBtn" target="_blank" rel="noopener" class="bd-btn">Buy Now →</a>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="tbl-header">
+      <div class="tbl-title">All pharmacies compared</div>
       <div class="sort-bar">
         <button class="sb active" onclick="sortBy('price',this)">↑ Price</button>
         <button class="sb" onclick="sortBy('discount',this)">% Off</button>
       </div>
     </div>
 
-    <div id="bb" class="best-banner" style="display:none">
-      <div class="bl">
-        <span style="font-size:24px">🏆</span>
-        <div><div class="blabel">Best Deal Found</div><div class="bname" id="bn"></div></div>
-      </div>
-      <div style="text-align:right">
-        <div class="bprice" id="bp"></div>
-        <div class="bsave" id="bs"></div>
-      </div>
-    </div>
+    <table class="compare-table" id="compareTable">
+      <thead>
+        <tr>
+          <th>Pharmacy</th>
+          <th>Price</th>
+          <th>MRP</th>
+          <th>Discount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
 
-    <div class="grid" id="grid"></div>
     <div class="disclaimer">
       <strong>⚠️ Note:</strong> Prices are live and may vary by pincode, stock, or ongoing offers. Always verify before purchasing. MedCompare is independent and not affiliated with any pharmacy.
     </div>
@@ -192,175 +247,197 @@ footer a{color:var(--accent);text-decoration:none}
 
 <script>
 const API = window.location.origin;
+
 const PHARMACIES = ['PharmEasy','Truemeds','1mg','Apollo Pharmacy'];
 const META = {
-  'PharmEasy':       {emoji:'🟠', color:'#fb6200', rating:'4.3★'},
-  'Truemeds':        {emoji:'🟤', color:'#e87722', rating:'4.3★'},
-  '1mg':             {emoji:'🔴', color:'#e8192c', rating:'4.5★'},
-  'Apollo Pharmacy': {emoji:'🔵', color:'#0072bc', rating:'4.4★'},
+  'PharmEasy':       {emoji:'🟠', color:'#fb6200', rating:'4.3★', dot:'#fb6200'},
+  'Truemeds':        {emoji:'🟤', color:'#e87722', rating:'4.3★', dot:'#e87722'},
+  '1mg':             {emoji:'🔴', color:'#e8192c', rating:'4.5★', dot:'#e8192c'},
+  'Apollo Pharmacy': {emoji:'🔵', color:'#0072bc', rating:'4.4★', dot:'#0072bc'},
 };
 
 let DATA = {}, currentSort = 'price';
 
-function initCards() {
-  document.getElementById('grid').innerHTML = PHARMACIES.map((n,i) => `
-    <div class="card" id="card-${eid(n)}" style="animation-delay:${i*.06}s">
-      <div class="ctop">
-        <div class="plogo" style="background:${META[n].color}18;border:1px solid ${META[n].color}40">${META[n].emoji}</div>
-        <div><div class="pname">${n}</div><div class="prating">${META[n].rating}</div></div>
-      </div>
-      <div class="divl"></div>
-      <div class="loading-state">
-        <div class="spin-c"></div>
-        <div class="loading-label">Checking price...</div>
-      </div>
-    </div>`).join('');
-}
+// ── Render table ──────────────────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
 
-function renderCard(name, data) {
-  const m  = META[name];
-  const p0 = data?.products?.[0];
-  const all = PHARMACIES.map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
-  const bp  = all.length ? Math.min(...all) : Infinity;
-  const isBest = p0 && p0.price === bp && all.length > 1;
+  // Sort pharmacies
+  const sorted = [...PHARMACIES].sort((a, b) => {
+    const pa = DATA[a]?.products?.[0];
+    const pb = DATA[b]?.products?.[0];
+    if (currentSort === 'price') {
+      if (!pa && !pb) return 0;
+      if (!pa) return 1;
+      if (!pb) return -1;
+      return pa.price - pb.price;
+    } else {
+      const da = pa ? discPct(pa) : -1;
+      const db = pb ? discPct(pb) : -1;
+      return db - da;
+    }
+  });
 
-  const card = document.getElementById('card-' + eid(name));
-  if (!card) return;
-  card.className = 'card' + (isBest ? ' best' : '');
+  // Find best price
+  const prices = PHARMACIES.map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
+  const bestPrice = prices.length ? Math.min(...prices) : null;
 
-  let body = `
-    ${isBest ? '<div class="best-tag">🏆 BEST PRICE</div>' : ''}
-    <div class="ctop">
-      <div class="plogo" style="background:${m.color}18;border:1px solid ${m.color}40">${m.emoji}</div>
-      <div><div class="pname">${name}</div><div class="prating">${m.rating}</div></div>
-    </div>
-    <div class="divl"></div>`;
+  tbody.innerHTML = sorted.map(name => {
+    const m   = META[name];
+    const d   = DATA[name];
+    const p0  = d?.products?.[0];
+    const isBest = p0 && p0.price === bestPrice && prices.length > 1;
 
-  if (p0) {
-    const d  = p0.mrp > p0.price ? Math.round((1-p0.price/p0.mrp)*100) : 0;
-    const ms = p0.match_score;
-    body += `
-      <div class="prod-name">${p0.name}</div>
-      ${ms ? `<div class="mscore">✓ ${ms}% match</div>` : ''}
-      <div class="price-row">
+    if (!d) {
+      // Still loading
+      return `<tr class="loading-row">
+        <td><div class="ph-cell">
+          <div class="ph-dot" style="background:${m.dot}"></div>
+          <div><span class="ph-name">${name}</span><span class="ph-rating">${m.rating}</span></div>
+        </div></td>
+        <td colspan="4" style="text-align:left">
+          <span class="spin-inline"></span>
+          <span class="skel" style="width:60px;height:12px"></span>
+        </td>
+      </tr>`;
+    }
+
+    if (!p0) {
+      // Not found
+      return `<tr class="nf-row">
+        <td><div class="ph-cell">
+          <div class="ph-dot" style="background:${m.dot};opacity:.4"></div>
+          <div><span class="ph-name" style="opacity:.5">${name}</span></div>
+        </div></td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td><a href="${d.searchUrl||'#'}" target="_blank" rel="noopener" class="buy-link secondary" style="opacity:.6">Search →</a></td>
+      </tr>`;
+    }
+
+    const disc = discPct(p0);
+    return `<tr class="data-row${isBest ? ' best-row' : ''}">
+      <td><div class="ph-cell">
+        <div class="ph-dot" style="background:${m.dot}"></div>
         <div>
-          ${p0.mrp > p0.price ? `<div class="pmrp">MRP ₹${(+p0.mrp).toFixed(2)}</div>` : ''}
-          <div class="pmain" style="color:${m.color}">₹${(+p0.price).toFixed(2)}</div>
+          <span class="ph-name">${name}</span>
+          ${isBest ? '<span class="best-badge">BEST</span>' : ''}
+          <span class="ph-rating">${m.rating}</span>
         </div>
-        ${d > 0 ? `<div class="disc">${d}% OFF</div>` : ''}
-      </div>
-      <a href="${p0.link}" target="_blank" rel="noopener" class="buy ${isBest?'p':'s'}">
-        ${isBest ? '🛒 Buy — Best Price' : `View on ${name} →`}
-      </a>`;
-  } else {
-    body += `
-      <div class="unavail">
-        <div class="uico">🔍</div>
-        <div class="utxt">${data?.error ? 'Could not fetch' : 'Not found on '+name}</div>
-        <a href="${data?.searchUrl||'#'}" target="_blank" rel="noopener" class="buy s">Search Manually →</a>
-      </div>`;
-  }
-  card.innerHTML = body;
-  updateBanner();
+      </div></td>
+      <td><span class="price-cell${isBest?' best':''}">₹${(+p0.price).toFixed(2)}</span></td>
+      <td><span class="mrp-cell">${p0.mrp > p0.price ? '₹'+((+p0.mrp).toFixed(2)) : '—'}</span></td>
+      <td><span class="disc-cell">${disc > 0 ? disc+'% off' : '—'}</span></td>
+      <td><a href="${p0.link}" target="_blank" rel="noopener" class="buy-link ${isBest?'primary':'secondary'}">
+        ${isBest ? 'Buy Now →' : 'View →'}
+      </a></td>
+    </tr>`;
+  }).join('');
 }
 
-function updateBanner() {
+// ── Best deal banner ──────────────────────────────────────────────────────────
+function updateBestDeal() {
   const ok = PHARMACIES.filter(n => DATA[n]?.products?.[0]);
-  if (!ok.length) { document.getElementById('bb').style.display='none'; return; }
-  const best = ok.reduce((a,b) => DATA[a].products[0].price < DATA[b].products[0].price ? a : b);
-  const max  = ok.reduce((a,b) => DATA[a].products[0].price > DATA[b].products[0].price ? a : b);
-  const bp = DATA[best].products[0].price, mp = DATA[max].products[0].price;
-  const pct = mp > bp ? Math.round((1 - bp/mp) * 100) : 0;
-  document.getElementById('bb').style.display = 'flex';
-  document.getElementById('bn').textContent   = `${best} — ${DATA[best].products[0].name}`;
-  document.getElementById('bp').textContent   = `₹${bp.toFixed(2)}`;
-  document.getElementById('bs').textContent   = mp > bp
-    ? `Save ₹${(mp-bp).toFixed(2)} (${pct}%) vs highest price`
-    : 'Lowest available price';
-  const done = PHARMACIES.filter(n => DATA[n] !== undefined).length;
-  const rmEl = document.getElementById('rm');
+  if (!ok.length) { document.getElementById('bestDeal').style.display='none'; return; }
+
+  const best  = ok.reduce((a,b) => DATA[a].products[0].price < DATA[b].products[0].price ? a : b);
+  const worst = ok.reduce((a,b) => DATA[a].products[0].price > DATA[b].products[0].price ? a : b);
+  const bp    = DATA[best].products[0];
+  const wp    = DATA[worst].products[0];
+  const save  = wp.price > bp.price ? (wp.price - bp.price) : 0;
+  const pct   = wp.price > bp.price ? Math.round((1 - bp.price/wp.price)*100) : 0;
+
+  document.getElementById('bestDeal').style.display = 'flex';
+  document.getElementById('bdPharmacy').textContent  = best;
+  document.getElementById('bdProduct').textContent   = bp.name;
+  document.getElementById('bdPrice').textContent     = `₹${(+bp.price).toFixed(2)}`;
+  document.getElementById('bdSavings').textContent   = save > 0
+    ? `Save ₹${save.toFixed(2)} (${pct}%) vs highest` : 'Lowest available price';
+  document.getElementById('bdBtn').href = bp.link;
+
+  // Update status
+  const done  = PHARMACIES.filter(n => DATA[n] !== undefined).length;
+  const found = ok.length;
+  const rmEl  = document.getElementById('rm');
   if (done >= PHARMACIES.length) {
-    rmEl.dataset.locked = '1';
-    rmEl.textContent = `Found prices on ${ok.length} of ${PHARMACIES.length} pharmacies`;
+    rmEl.textContent = `Prices found on ${found} of ${PHARMACIES.length} pharmacies`;
   }
 }
 
-function reorder() {
-  const grid = document.getElementById('grid');
-  [...grid.children].sort((a,b) => {
-    const na = a.id.replace('card-','').replace(/_/g,' ');
-    const nb = b.id.replace('card-','').replace(/_/g,' ');
-    const pa = DATA[na]?.products?.[0], pb = DATA[nb]?.products?.[0];
-    if (currentSort==='price') return (pa?.price??Infinity)-(pb?.price??Infinity);
-    return discPct(pb)-discPct(pa);
-  }).forEach(c => grid.appendChild(c));
-}
+// ── Main search ───────────────────────────────────────────────────────────────
+let progressTimer = null;
 
 async function doSearch() {
   const q = document.getElementById('inp').value.trim();
   if (!q) { document.getElementById('inp').focus(); return; }
+
   document.getElementById('btn').disabled    = true;
-  document.getElementById('btn').textContent = '🔄 Checking pharmacies...';
+  document.getElementById('btn').textContent = 'Comparing...';
   document.getElementById('qt').textContent  = q;
-  document.getElementById('rm').textContent  = 'Checking 4 pharmacies...';
-  document.getElementById('bb').style.display = 'none';
-  document.getElementById('rm').dataset.locked = '0';
-  startProgressHints();
+  document.getElementById('rm').textContent  = 'Checking pharmacies...';
+  document.getElementById('bestDeal').style.display  = 'none';
   document.getElementById('timeBadge').style.display  = 'none';
   document.getElementById('cacheBadge').style.display = 'none';
   document.getElementById('results').style.display    = 'block';
   document.getElementById('popularSection').style.display = 'none';
   DATA = {};
-  initCards();
+  renderTable();
+
+  // Progress hints
+  clearInterval(progressTimer);
+  const hints = [
+    'Checking pharmacies...',
+    'PharmEasy & Truemeds done...',
+    'Checking 1mg & Apollo...',
+    'Almost done...'
+  ];
+  let hi = 0;
+  progressTimer = setInterval(() => {
+    hi = (hi+1) % hints.length;
+    const el = document.getElementById('rm');
+    if (el && !el.dataset.done) el.textContent = hints[hi];
+  }, 3500);
 
   try {
     const res  = await fetch(`${API}/api/compare?medicine=${encodeURIComponent(q)}`);
     const json = await res.json();
+
+    clearInterval(progressTimer);
     json.results.forEach(r => { DATA[r.pharmacy] = r; });
-    PHARMACIES.forEach(name => {
-      const d = DATA[name] || {pharmacy:name, products:[], error:'No data', searchUrl:'#'};
-      DATA[name] = d;
-      renderCard(name, d);
+
+    // Fill in any missing pharmacies
+    PHARMACIES.forEach(n => {
+      if (!DATA[n]) DATA[n] = {pharmacy:n, products:[], error:'No data', searchUrl:'#'};
     });
+
+    renderTable();
+    updateBestDeal();
+    document.getElementById('rm').dataset.done = '1';
+
     const tb = document.getElementById('timeBadge');
     tb.textContent  = `⏱ ${json.time_taken}s`;
     tb.style.display = 'inline';
     if (json.cached) document.getElementById('cacheBadge').style.display = 'inline';
-    stopProgressHints();
-    updateBanner();
-    reorder();
+
   } catch(err) {
-    stopProgressHints();
-    document.getElementById('rm').textContent = `⚠️ ${err.message}`;
+    clearInterval(progressTimer);
+    document.getElementById('rm').textContent = `⚠️ Error: ${err.message}`;
+    document.getElementById('tableBody').innerHTML = `
+      <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">
+        Could not reach API. Please try again.
+      </td></tr>`;
   }
+
   document.getElementById('btn').disabled    = false;
-  document.getElementById('btn').textContent = 'Compare Prices';
+  document.getElementById('btn').textContent = 'Compare';
 }
 
-// Rotate reassuring sub-messages while waiting (Apollo/1mg take longest)
-let progressTimer = null;
-function startProgressHints() {
-  const hints = [
-    'Checking 4 pharmacies...',
-    'PharmEasy and Truemeds are quick...',
-    'Now checking 1mg and Apollo...',
-    'Almost there, comparing prices...'
-  ];
-  let i = 0;
-  clearInterval(progressTimer);
-  progressTimer = setInterval(() => {
-    i = (i + 1) % hints.length;
-    const el = document.getElementById('rm');
-    if (el && el.dataset.locked !== '1') el.textContent = hints[i];
-  }, 3500);
-}
-function stopProgressHints() {
-  clearInterval(progressTimer);
-}
-
-function sortBy(t,b) {
-  document.querySelectorAll('.sb').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); currentSort=t; reorder();
+function sortBy(t, btn) {
+  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSort = t;
+  renderTable();
 }
 
 async function loadPopular() {
@@ -370,13 +447,13 @@ async function loadPopular() {
     const list = json.popular || [];
     if (!list.length) return;
     document.getElementById('popularSection').style.display = 'block';
-    document.getElementById('popularGrid').innerHTML = list.map((p,i) => `
-      <div class="pop-item" onclick="qs('${p.query}')">#${i+1} ${p.query} <span style="color:var(--accent);font-size:9px">${p.count}x</span></div>`).join('');
+    document.getElementById('popularGrid').innerHTML = list.map((p,i) =>
+      `<div class="pop-item" onclick="qs('${p.query}')">#${i+1} ${p.query}</div>`
+    ).join('');
   } catch(e) {}
 }
 
 function discPct(p){ return p&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0; }
-function eid(n){ return n.replace(/\s/g,'_'); }
 function qs(t){ document.getElementById('inp').value=t; doSearch(); }
 document.getElementById('inp').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 loadPopular();
