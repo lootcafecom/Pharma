@@ -381,6 +381,10 @@ async function doSearch() {
   document.getElementById('cacheBadge').style.display = 'none';
   document.getElementById('results').style.display    = 'block';
   document.getElementById('popularSection').style.display = 'none';
+  // Scroll to results smoothly
+  setTimeout(() => {
+    document.getElementById('results').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }, 100);
   DATA = {};
   renderTable();
 
