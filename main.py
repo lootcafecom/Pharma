@@ -227,20 +227,64 @@ async def fetch_truemeds(query: str) -> dict:
         return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": str(e)}
 
 
-# ── 1mg — Browser XHR capture ────────────────────────────────────────────────
+# ── 1mg — Browser XHR capture with smart wait ────────────────────────────────
 async def fetch_1mg(query: str) -> dict:
     pharmacy = "1mg"
     url      = f"https://www.1mg.com/search/all?name={query}"
-    found    = {}
+    browser  = await get_browser()
+    captured = []
 
-    async def scroll(page):
-        await page.wait_for_timeout(1200)
+    try:
+        ctx = await browser.new_context(
+            user_agent=BASE_HEADERS["User-Agent"],
+            locale="en-IN", timezone_id="Asia/Kolkata",
+            extra_http_headers={"Accept-Language": "en-IN,en;q=0.9"}
+        )
+        await ctx.route(
+            "**/*.{png,jpg,jpeg,gif,webp,svg,woff,woff2,ttf,eot,ico}",
+            lambda r: r.abort()
+        )
+
+        search_done = asyncio.Event()
+
+        async def on_resp(resp):
+            try:
+                if resp.status != 200: return
+                if "json" not in resp.headers.get("content-type", ""): return
+                data = await resp.json()
+                if data:
+                    captured.append({"url": resp.url, "data": data})
+                    # Signal early exit when search API responds
+                    if "search/all" in resp.url and "pwa-dweb-api" in resp.url:
+                        search_done.set()
+            except Exception: pass
+
+        page = await ctx.new_page()
+        page.on("response", on_resp)
+
+        try:
+            await page.goto(url, wait_until="domcontentloaded", timeout=25000)
+        except Exception: pass
+
+        # Scroll to trigger search
+        await page.wait_for_timeout(1000)
         await page.evaluate("window.scrollTo(0, 300)")
-        await page.wait_for_timeout(800)
 
-    resps = await browser_capture(url, 4500, scroll)
+        # Wait for search API response OR timeout — whichever comes first
+        try:
+            await asyncio.wait_for(search_done.wait(), timeout=8.0)
+        except asyncio.TimeoutError:
+            # Extra scroll + wait as fallback
+            await page.evaluate("window.scrollTo(0, 0)")
+            await page.wait_for_timeout(2000)
 
-    for r in resps:
+        await ctx.close()
+    except Exception as e:
+        print(f"1mg error: {e}")
+
+    # Parse results
+    found = {}
+    for r in captured:
         if "search/all" in r["url"] and "pwa-dweb-api" in r["url"]:
             found = r["data"]
             break
