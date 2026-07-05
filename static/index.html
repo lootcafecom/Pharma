@@ -574,6 +574,7 @@ async function loadPopular() {
 }
 
 function discPct(p){ return p&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0; }
+function eid(n){ return n.replace(/\s/g,'_'); }
 function qs(t){ document.getElementById('inp').value=t; doSearch(); }
 document.getElementById('inp').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 loadPopular();
