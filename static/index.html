@@ -289,6 +289,44 @@ html:not([data-theme="dark"]) header{background:rgba(255,255,255,.9)}
 main .wrap > .section-container,
 main .wrap > .section-head{margin-top:8px}
 .section-block{margin:44px 0}
+
+/* Savings example section */
+.savings-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding:36px 0 8px}
+.savings-eyebrow{display:inline-block;background:rgba(14,165,233,.1);color:var(--accent);font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:12px}
+.savings-copy h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(20px,2.6vw,28px);font-weight:800;margin-bottom:12px;line-height:1.25}
+.savings-copy p{font-size:14.5px;color:var(--muted);line-height:1.7;margin-bottom:18px}
+.savings-points{display:flex;flex-direction:column;gap:10px}
+.savings-point{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--text);font-weight:500}
+.sp-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);flex-shrink:0}
+.savings-example-card{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:24px 26px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.sec-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent2);font-weight:700;margin-bottom:4px}
+.sec-medname{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.sec-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:1px solid var(--border);font-size:13.5px}
+.sec-row strong{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800}
+.sec-row .sec-low{color:var(--accent2)}
+.sec-diff{margin-top:16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);font-weight:600;line-height:1.5}
+@media(max-width:800px){.savings-wrap{grid-template-columns:1fr}}
+
+/* Trust & transparency grid */
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:30px 0 8px}
+.trust-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px 24px;transition:all .25s}
+.trust-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(15,23,42,.07);border-color:rgba(14,165,233,.3)}
+.trust-card-ico{width:44px;height:44px;border-radius:12px;background:rgba(14,165,233,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.trust-card h4{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px}
+.trust-card p{font-size:13px;color:var(--muted);line-height:1.6}
+.trust-link{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:700;color:var(--accent2);text-decoration:none}
+@media(max-width:900px){.trust-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.trust-grid{grid-template-columns:1fr}}
+
+/* FAQ accordion (native details/summary — no JS) */
+.faq-list{max-width:760px;margin:0 auto;padding:30px 0 10px;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px 22px;transition:border-color .2s}
+.faq-item[open]{border-color:rgba(16,185,129,.35)}
+.faq-item summary{list-style:none;cursor:pointer;padding:16px 0;font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'+';font-size:20px;font-weight:400;color:var(--accent2);flex-shrink:0;transition:transform .25s}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item p{font-size:13.5px;color:var(--muted);line-height:1.7;padding-bottom:18px}
 .page-band{position:relative;padding:46px 0}
 .page-band.alt::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);background:var(--bg2);z-index:-1;transition:background .25s ease}
 
@@ -532,6 +570,29 @@ footer{border-top:1px solid var(--border);padding:40px 0 20px;margin-top:20px;ba
     <div class="feature-card"><div class="feature-ico">✅</div><h3>Trusted Data</h3><p>Live prices from leading pharmacies only</p></div>
     <div class="feature-card"><div class="feature-ico">❤️</div><h3>Better Health for All</h3><p>Helping you get affordable medicines</p></div>
   </div>
+
+  <!-- Real savings example -->
+  <div class="savings-wrap">
+    <div class="savings-copy">
+      <span class="savings-eyebrow">Why prices differ</span>
+      <h3>The same medicine, four different prices</h3>
+      <p>Pharmacies set their own prices and discounts — so identical medicines, same brand, same pack size, routinely cost 15–30% more at one pharmacy than another. That gap is pure margin you don't have to pay if you check first.</p>
+      <div class="savings-points">
+        <div class="savings-point"><span class="sp-dot"></span>No two pharmacies price identically</div>
+        <div class="savings-point"><span class="sp-dot"></span>Discounts change daily, sometimes hourly</div>
+        <div class="savings-point"><span class="sp-dot"></span>Checking manually across 4 apps takes minutes — we do it in seconds</div>
+      </div>
+    </div>
+    <div class="savings-example-card">
+      <div class="sec-label">Example comparison</div>
+      <div class="sec-medname">Same medicine · same pack size</div>
+      <div class="sec-row"><span>PharmEasy</span><strong class="sec-low">₹24.09</strong></div>
+      <div class="sec-row"><span>Truemeds</span><strong>₹25.70</strong></div>
+      <div class="sec-row"><span>1mg</span><strong>₹28.90</strong></div>
+      <div class="sec-row"><span>Apollo Pharmacy</span><strong>₹32.00</strong></div>
+      <div class="sec-diff">₹7.91 difference between cheapest &amp; priciest — for the exact same product</div>
+    </div>
+  </div>
   </section>
 
   <!-- How it works -->
@@ -555,6 +616,47 @@ footer{border-top:1px solid var(--border);padding:40px 0 20px;margin-top:20px;ba
     <div class="step">
       <div class="step-badge">🛒<span class="step-num">4</span></div>
       <div class="step-card"><h3>Buy &amp; Save</h3><p>Click to visit the store and place your order</p></div>
+    </div>
+  </div>
+  </section>
+
+  <!-- Trust & Transparency -->
+  <section class="page-band">
+  <div class="section-head" id="trust">
+    <h2>Built to Be <span>Trustworthy</span></h2>
+    <p>Nothing hidden. Here's exactly how MedCompare works and what it does — and doesn't — do with your data.</p>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="trust-card-ico">🔗</div>
+      <h4>Direct pharmacy links only</h4>
+      <p>Every "Buy Now" takes you straight to the pharmacy's own official product page — never a third-party checkout or reseller.</p>
+    </div>
+    <div class="trust-card">
+      <div class="trust-card-ico">🚫</div>
+      <h4>No sponsored placement</h4>
+      <p>Results are sorted purely by price. No pharmacy pays to rank higher — we have no advertising or affiliate deals today.</p>
+    </div>
+    <div class="trust-card">
+      <div class="trust-card-ico">🔓</div>
+      <h4>Open source &amp; auditable</h4>
+      <p>The code that fetches and compares these prices is public on GitHub — you can read exactly how it works, line by line.</p>
+      <a href="https://github.com/lootcafecom/medcompare" target="_blank" rel="noopener" class="trust-link">View source on GitHub →</a>
+    </div>
+    <div class="trust-card">
+      <div class="trust-card-ico">🔒</div>
+      <h4>No account, no payment data</h4>
+      <p>You don't sign up or enter payment details here. We never see, store, or touch your card or health information.</p>
+    </div>
+    <div class="trust-card">
+      <div class="trust-card-ico">🏢</div>
+      <h4>Independent, not pharmacy-owned</h4>
+      <p>MedCompare isn't run by or affiliated with PharmEasy, 1mg, Truemeds, or Apollo. We just compare their public prices.</p>
+    </div>
+    <div class="trust-card">
+      <div class="trust-card-ico">⏱️</div>
+      <h4>Prices fetched live, not cached indefinitely</h4>
+      <p>Every search pulls current prices directly from each pharmacy at request time, so what you see reflects what they're showing right now.</p>
     </div>
   </div>
   </section>
@@ -599,6 +701,35 @@ footer{border-top:1px solid var(--border);padding:40px 0 20px;margin-top:20px;ba
         <span class="blog-read">Read More →</span>
       </div>
     </a>
+  </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="page-band alt">
+  <div class="section-head" id="faq">
+    <h2>Frequently Asked <span>Questions</span></h2>
+  </div>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary>Is MedCompare affiliated with any pharmacy?</summary>
+      <p>No. We're an independent price comparison tool. We don't own, run, or have a financial relationship with PharmEasy, Truemeds, 1mg, or Apollo Pharmacy — we simply check their publicly listed prices for you.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How do you get these prices — are they accurate?</summary>
+      <p>We fetch prices directly from each pharmacy's own site at the moment you search. Prices can still change quickly, vary by stock or delivery pincode, or differ slightly by the time you check out — always confirm the final price on the pharmacy's page before paying.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Do you sell or store my personal data?</summary>
+      <p>We don't require an account, and we don't collect payment or health information. Your search terms may be logged anonymously to power the "Popular Searches" feature — nothing more.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Why is a pharmacy sometimes missing from my results?</summary>
+      <p>Some pharmacy sites occasionally block automated price checks or don't have the exact medicine listed. When that happens we say so honestly instead of showing a guessed price.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Do you make money from this?</summary>
+      <p>Not currently — there's no advertising or affiliate revenue built in today. If that ever changes, it won't affect how results are ranked; price will always come first.</p>
+    </details>
   </div>
   </section>
 
