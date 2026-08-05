@@ -3,171 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedCompare India — Compare Medicine Prices</title>
-<meta name="description" content="Compare medicine prices across PharmEasy, 1mg, Apollo, Truemeds. Find cheapest price instantly.">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>MedCompare India — Live Medicine Price Comparison</title>
+<meta name="description" content="Compare medicine prices across PharmEasy, Truemeds, 1mg, Apollo instantly. Find the cheapest price for any medicine in India.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0f1e;--surface:#111827;--surface2:#1a2234;--border:#1e2d45;
-  --accent:#00d4aa;--accent2:#0099ff;--accent3:#ff6b35;
-  --text:#e8f0fe;--muted:#6b7fa3;--warning:#ffb800;--danger:#ff4757;
+:root {
+  --bg:       #FFFFFF;
+  --bg2:      #F8FAFC;
+  --surface:  #FFFFFF;
+  --surface2: #F1F5F9;
+  --border:   #E2E8F0;
+  --accent:   #0EA5E9;
+  --accent2:  #10B981;
+  --accent3:  #F97316;
+  --text:     #0F172A;
+  --muted:    #64748B;
+  --faint:    #94A3B8;
+  --warning:  #F59E0B;
+  --danger:   #EF4444;
+  --success:  #22C55E;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.wrap{max-width:900px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(14,165,233,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.035) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;mask-image:radial-gradient(ellipse 70% 50% at 50% 0%,#000 40%,transparent 100%)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+a{color:inherit}
 
 /* Header */
-header{padding:16px 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,15,30,.95);backdrop-filter:blur(10px);z-index:100}
-.hdr{display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text)}
-.logo-text span{color:var(--accent)}
-.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--accent)}
-.ldot{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+header{padding:18px 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);z-index:100}
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 4px 12px rgba(14,165,233,.25)}
+.logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800;color:var(--text)}
+.logo-text span{color:var(--accent2)}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:600;color:var(--muted)}
+.nav-links a{text-decoration:none;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-links a.active{color:var(--accent2)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--accent2);color:#fff;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(16,185,129,.25)}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--surface);cursor:pointer;flex-shrink:0}
+.burger{display:none}
 
 /* Hero */
-.hero{padding:44px 0 28px;text-align:center}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(24px,4.5vw,46px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:10px}
-.hl{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{color:var(--muted);font-size:14px;margin-bottom:28px}
+.hero{padding:56px 0 40px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:20px}
+.hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(30px,4.6vw,48px);font-weight:800;line-height:1.12;letter-spacing:-1px;margin-bottom:16px;color:var(--text)}
+.hl{color:var(--accent2)}
+.hl2{color:var(--accent)}
+.hero p{color:var(--muted);font-size:16px;max-width:460px;margin-bottom:30px;line-height:1.65}
 
 /* Search */
-.search-wrap{max-width:580px;margin:0 auto}
-.sbox{display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}
-.sbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,170,.1)}
-.si{padding:0 14px;color:var(--muted);font-size:16px;display:flex;align-items:center}
-#inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;padding:14px 0;font-family:'DM Sans',sans-serif}
-#inp::placeholder{color:var(--muted)}
-#btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:0 22px;cursor:pointer;white-space:nowrap;transition:opacity .2s}
-#btn:hover{opacity:.9}
-#btn:disabled{opacity:.5;cursor:not-allowed}
-.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.tag{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
-.tag:hover{border-color:var(--accent);color:var(--accent)}
+.search-wrap{max-width:560px}
+.search-row{display:flex;gap:10px;margin-bottom:14px}
+.search-box{flex:1;display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.12)}
+.si{padding:0 14px;display:flex;align-items:center;color:var(--faint);font-size:16px;flex-shrink:0}
+#inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:15px 0;min-width:0}
+#inp::placeholder{color:var(--faint)}
+.pincode-box{display:flex;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;width:120px;flex-shrink:0;transition:border-color .2s;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.pincode-box:focus-within{border-color:var(--accent)}
+.pi{padding:0 8px 0 12px;display:flex;align-items:center;color:var(--faint);font-size:13px}
+#pincode{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:15px 8px 15px 0}
+#pincode::placeholder{color:var(--faint)}
+#btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent2),#0d9668);border:none;border-radius:14px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s,opacity .2s;box-shadow:0 6px 16px rgba(16,185,129,.28)}
+#btn:hover{transform:translateY(-1px)}
+#btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tags-label{font-size:12px;color:var(--faint);font-weight:600;margin-right:2px}
+.tag{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
+.tag:hover{border-color:var(--accent2);color:var(--accent2);background:rgba(16,185,129,.06)}
 
-/* Results section */
-#results{display:none;padding:24px 0}
+/* Hero illustration */
+.hero-art{position:relative;height:320px;display:flex;align-items:center;justify-content:center}
+.art-glow{position:absolute;width:280px;height:280px;background:radial-gradient(circle,rgba(14,165,233,.14),transparent 70%);border-radius:50%}
+.art-center{font-size:150px;position:relative;filter:drop-shadow(0 20px 30px rgba(14,165,233,.18))}
+.float-card{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px rgba(15,23,42,.08);font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;animation:floaty 4s ease-in-out infinite}
+.float-card .fc-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.float-card .fc-sub{font-weight:500;color:var(--faint);font-size:10px}
+.fc1{top:6%;left:0;animation-delay:.2s}
+.fc1 .fc-ico{background:rgba(34,197,94,.12)}
+.fc2{top:12%;right:0;animation-delay:1s}
+.fc2 .fc-ico{background:rgba(14,165,233,.12)}
+.fc3{bottom:10%;right:4%;animation-delay:1.8s}
+.fc3 .fc-ico{background:rgba(16,185,129,.12)}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 
-/* Medicine title row */
-.med-title{margin-bottom:20px}
-.med-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
-.med-name span{color:var(--accent)}
-.med-meta{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.tbadge{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:10px}
-.cbadge{background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--warning)}
+/* Trust bar */
+.trust-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:22px 0 8px}
+.trust-item{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:12px}
+.trust-ico{width:38px;height:38px;border-radius:50%;background:rgba(16,185,129,.1);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.trust-item strong{font-size:13px;display:block;font-family:'Plus Jakarta Sans',sans-serif}
+.trust-item span{font-size:11.5px;color:var(--muted)}
 
-/* Best deal highlight */
-.best-deal{background:linear-gradient(135deg,rgba(0,212,170,.1),rgba(0,153,255,.07));border:1.5px solid rgba(0,212,170,.3);border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;animation:slideDown .3s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.bd-left{display:flex;align-items:center;gap:14px}
-.bd-icon{font-size:28px}
-.bd-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700;margin-bottom:3px}
-.bd-pharmacy{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
-.bd-product{font-size:12px;color:var(--muted);margin-top:2px}
-.bd-price{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent);line-height:1}
-.bd-savings{font-size:12px;color:var(--muted);margin-top:3px;text-align:right}
-.bd-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:9px;padding:10px 20px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s;white-space:nowrap}
-.bd-btn:hover{opacity:.88}
+/* Section heading */
+.section-head{text-align:center;padding:52px 0 6px}
+.section-head h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;color:var(--text)}
+.section-head h2 span{color:var(--accent2)}
+.section-head p{color:var(--muted);font-size:14px;margin-top:8px}
 
-/* Comparison table */
-.compare-table{width:100%;border-collapse:collapse;margin-bottom:16px}
-.compare-table th{background:var(--surface2);padding:10px 14px;font-size:11px;font-weight:600;color:var(--muted);text-align:left;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
-.compare-table th:nth-child(2),.compare-table td:nth-child(2){text-align:right}
-.compare-table th:nth-child(3),.compare-table td:nth-child(3){text-align:right}
-.compare-table th:nth-child(4),.compare-table td:nth-child(4){text-align:center}
-.compare-table th:last-child,.compare-table td:last-child{text-align:center}
-.compare-table tr.data-row{border-bottom:1px solid var(--border);transition:background .2s}
-.compare-table tr.data-row:hover{background:rgba(255,255,255,.02)}
-.compare-table tr.data-row.best-row{background:rgba(0,212,170,.04)}
-.compare-table td{padding:12px 14px;font-size:13px;vertical-align:middle}
+/* Platforms */
+.platforms{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:16px 0 0}
+.pp{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.pd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
-/* Pharmacy cell */
-.ph-cell{display:flex;align-items:center;gap:9px}
-.ph-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.ph-name{font-weight:600;font-size:13px}
-.ph-rating{font-size:10px;color:var(--warning);display:block;margin-top:1px}
-.best-badge{background:var(--accent);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:6px;letter-spacing:.3px}
+/* Results */
+#results{display:none;padding:28px 0 8px}
+.rh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.rtitle{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800}
+.rtitle span{color:var(--accent2)}
+.rmeta{font-size:12.5px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.time-badge{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:10.5px}
+.cache-badge{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:2px 8px;font-size:10.5px;color:var(--warning)}
+.sort-bar{display:flex;gap:6px}
+.sb{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.sb.active,.sb:hover{border-color:var(--accent2);color:var(--accent2);background:rgba(16,185,129,.06)}
 
-/* Price cells */
-.price-cell{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
-.price-cell.best{color:var(--accent)}
-.mrp-cell{font-size:12px;color:var(--muted);text-decoration:line-through}
-.disc-cell{font-size:11px;font-weight:600;color:var(--accent3)}
+/* Best banner */
+.best-banner{background:linear-gradient(135deg,rgba(16,185,129,.09),rgba(14,165,233,.08));border:1px solid rgba(16,185,129,.25);border-radius:16px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.bl{display:flex;align-items:center;gap:14px}
+.blabel{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);font-weight:700}
+.bname{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.bprice{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;color:var(--accent2)}
+.bsave{font-size:11.5px;color:var(--muted);margin-top:2px}
 
-/* Action cell */
-.buy-link{display:inline-block;padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;text-decoration:none;transition:all .2s;white-space:nowrap}
-.buy-link.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.buy-link.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.buy-link:hover{opacity:.85;transform:translateY(-1px)}
-
-/* Loading row */
-.loading-row td{padding:14px;color:var(--muted);font-size:12px}
-.spin-inline{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px}
+/* Cards -> styled as elegant comparison rows */
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:18px 22px;transition:all .25s;position:relative;overflow:hidden;animation:fadeUp .4s ease forwards;opacity:0;transform:translateY(10px);box-shadow:0 1px 3px rgba(15,23,42,.04)}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.card:hover{border-color:rgba(16,185,129,.4);transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.1)}
+.card.best{border-color:var(--accent2);background:linear-gradient(135deg,rgba(16,185,129,.045),var(--surface))}
+.best-tag{position:absolute;top:14px;right:18px;background:var(--accent2);color:#fff;font-size:9.5px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.4px}
+.ctop{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.plogo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.pname{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+.prating{font-size:11px;color:var(--warning);margin-top:1px;font-weight:600}
+.divl{height:1px;background:var(--border);margin:12px 0}
+.prod-name{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.4;min-height:32px}
+.match-score{display:inline-block;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:5px;padding:2px 7px;font-size:10.5px;color:var(--accent2);margin-bottom:10px;font-weight:600}
+.price-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.pmain{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.pmrp{font-size:11.5px;color:var(--faint);text-decoration:line-through;margin-bottom:3px}
+.disc{background:rgba(249,115,22,.1);color:var(--accent3);border:1px solid rgba(249,115,22,.25);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700}
+.buy{padding:11px 22px;border-radius:10px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;text-align:center;letter-spacing:.2px}
+.buy.p{background:var(--accent2);color:#fff;box-shadow:0 6px 14px rgba(16,185,129,.25)}
+.buy.s{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.buy:hover{opacity:.9;transform:translateY(-1px)}
+.unavail{text-align:center;padding:8px 0}
+.uico{font-size:22px;margin-bottom:6px}
+.utxt{font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.4}
+.spin-c{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:sp .7s linear infinite;margin:16px auto}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* Not found row */
-.nf-row td{padding:12px 14px;color:var(--muted);font-size:12px;font-style:italic}
+/* Card row layout on wider screens: turn card content into a horizontal row like a table */
+@media(min-width:761px){
+  .card:not(.loading){display:flex;align-items:center;gap:22px;padding:16px 22px}
+  .card .ctop{margin-bottom:0;min-width:190px;flex-shrink:0}
+  .card .divl{display:none}
+  .card .prod-name,.card .match-score{display:none}
+  .card .price-row{margin-bottom:0;flex:1;justify-content:flex-start;gap:18px;align-items:center}
+  .card .unavail{display:flex;align-items:center;gap:14px;flex:1;text-align:left;padding:0}
+  .card .uico{margin-bottom:0}
+  .card .utxt{margin-bottom:0}
+  .best-tag{position:static;order:-1;margin-right:4px;flex-shrink:0}
+}
 
-/* Skeleton shimmer */
-.skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* Sort bar */
-.tbl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-.tbl-title{font-size:12px;color:var(--muted);font-weight:500}
-.sort-bar{display:flex;gap:5px}
-.sb{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-.sb.active,.sb:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.05)}
-
-.disclaimer{background:rgba(255,184,0,.04);border:1px solid rgba(255,184,0,.15);border-radius:8px;padding:10px 13px;font-size:11px;color:var(--muted);line-height:1.5}
+/* Disclaimer */
+.disclaimer{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);border-radius:10px;padding:12px 15px;font-size:11.5px;color:var(--muted);margin-top:20px;line-height:1.6}
 .disclaimer strong{color:var(--warning)}
 
-.popular-section{padding:20px 0 0}
-.section-title{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.popular-grid{display:flex;gap:6px;flex-wrap:wrap}
-.pop-item{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s}
-.pop-item:hover{border-color:var(--accent);color:var(--accent)}
+/* Savings banner (post compare, mirrors reference) */
+.save-banner{display:none;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(34,197,94,.06));border:1px solid rgba(16,185,129,.25);border-radius:16px;padding:20px 26px;margin-top:6px;flex-wrap:wrap}
 
-footer{border-top:1px solid var(--border);padding:16px 0;margin-top:40px;text-align:center;color:var(--muted);font-size:11px}
-footer a{color:var(--accent);text-decoration:none}
+/* Popular */
+.popular-section{padding:30px 0 0}
+.section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
+.popular-grid{display:flex;gap:8px;flex-wrap:wrap}
+.pop-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 15px;font-size:12.5px;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.pop-item:hover{border-color:var(--accent2);color:var(--accent2)}
+.pop-rank{font-size:10px;opacity:.55}
 
-/* ── Progress overlay ── */
-.progress-overlay{position:fixed;inset:0;background:rgba(10,15,30,.92);backdrop-filter:blur(8px);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
-.progress-overlay.active{opacity:1;pointer-events:all}
-.progress-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 40px;max-width:420px;width:90%;text-align:center}
-.progress-medicine{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
-.progress-medicine span{color:var(--accent)}
-.progress-subtitle{font-size:13px;color:var(--muted);margin-bottom:28px}
-.pharmacy-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;text-align:left}
-.ph-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);transition:all .4s}
-.ph-step.active{border-color:var(--accent);background:rgba(0,212,170,.06)}
-.ph-step.done{border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.04);opacity:.7}
-.ph-step.found{border-color:rgba(0,212,170,.5);background:rgba(0,212,170,.08)}
-.ph-step-icon{font-size:18px;flex-shrink:0}
-.ph-step-info{flex:1;min-width:0}
-.ph-step-name{font-size:13px;font-weight:600;font-family:'Syne',sans-serif}
-.ph-step-status{font-size:11px;color:var(--muted);margin-top:2px}
-.ph-step-price{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-.ph-spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
-.ph-check{color:var(--accent);font-size:16px;flex-shrink:0}
-.ph-cross{color:var(--muted);font-size:14px;flex-shrink:0}
-.progress-bar-wrap{background:var(--surface2);border-radius:20px;height:6px;overflow:hidden;margin-bottom:12px}
-.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px;width:0%;transition:width .5s ease}
-.progress-msg{font-size:12px;color:var(--muted);min-height:18px;transition:all .3s}
+/* Why choose us */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:26px 0 8px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px 20px;text-align:center;transition:all .25s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(15,23,42,.07);border-color:rgba(16,185,129,.3)}
+.feature-ico{width:54px;height:54px;border-radius:50%;background:rgba(14,165,233,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:23px;margin:0 auto 14px}
+.feature-card h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
+.feature-card p{font-size:12.5px;color:var(--muted);line-height:1.5}
 
+/* How it works */
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:30px 0 10px;position:relative}
+.step{text-align:center;padding:0 14px;position:relative}
+.step-num{width:34px;height:34px;border-radius:50%;background:var(--accent2);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative;z-index:2}
+.step-ico{width:60px;height:60px;border-radius:18px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+.step h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:5px}
+.step p{font-size:12px;color:var(--muted);line-height:1.5}
+.step-arrow{position:absolute;top:17px;right:-6px;color:var(--faint);font-size:18px;z-index:1}
+.step:last-child .step-arrow{display:none}
+
+/* CTA */
+.cta-band{background:linear-gradient(135deg,#E0F2FE,#DCFCE7);border-radius:22px;padding:34px 38px;margin:36px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.cta-band h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(18px,2.4vw,24px);font-weight:800;margin-bottom:4px}
+.cta-band h3 span{color:var(--accent2)}
+.cta-band p{font-size:13px;color:var(--muted)}
+.cta-btn{background:var(--accent2);color:#fff;border:none;border-radius:12px;padding:14px 26px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 8px 20px rgba(16,185,129,.28);text-decoration:none;flex-shrink:0}
+
+/* Blog */
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:24px 0 10px}
+.blog-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:all .25s;text-decoration:none;display:block}
+.blog-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(15,23,42,.08)}
+.blog-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.blog-body{padding:16px 18px}
+.blog-body h4{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.35}
+.blog-body p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.blog-read{font-size:12px;font-weight:700;color:var(--accent2)}
+.section-link{font-size:13px;font-weight:700;color:var(--accent2);text-decoration:none}
+
+footer{border-top:1px solid var(--border);padding:40px 0 20px;margin-top:20px;background:var(--bg2)}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:24px;margin-bottom:26px}
+.foot-brand p{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6;max-width:230px}
+.foot-col h5{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;margin-bottom:12px}
+.foot-col a{display:block;font-size:12.5px;color:var(--muted);text-decoration:none;margin-bottom:9px}
+.foot-col a:hover{color:var(--accent2)}
+.foot-bottom{border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--faint)}
+.foot-bottom a{color:var(--faint);text-decoration:none;margin-left:14px}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .trust-bar{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .steps-row{grid-template-columns:repeat(2,1fr);gap:24px}
+  .step-arrow{display:none}
+  .blog-grid{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
 @media(max-width:600px){
-  .hero h1{font-size:22px}
-  .compare-table th:nth-child(3),.compare-table td:nth-child(3){display:none}
-  .best-deal{flex-direction:column;align-items:flex-start}
-  .bd-price{font-size:26px}
-  .progress-box{padding:28px 20px}
+  .hero h1{font-size:26px}
+  .grid{grid-template-columns:1fr}
+  .rh{flex-direction:column}
+  .search-row{flex-wrap:wrap}
+  .pincode-box{width:100%}
+  .trust-bar{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .steps-row{grid-template-columns:1fr}
+  .cta-band{flex-direction:column;text-align:center}
+  .foot-grid{grid-template-columns:1fr}
+  .card:not(.loading){flex-direction:column;align-items:stretch}
+  .card .price-row{flex-wrap:wrap}
 }
 </style>
 </head>
 <body>
+
 <header>
   <div class="wrap">
     <div class="hdr">
@@ -175,391 +265,396 @@ footer a{color:var(--accent);text-decoration:none}
         <div class="logo-icon">💊</div>
         <div class="logo-text">Med<span>Compare</span></div>
       </a>
-      <div class="live-pill"><div class="ldot"></div>Live Prices</div>
+      <nav class="nav-links">
+        <a href="#" class="active">Home</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#why">About Us</a>
+        <a href="#blog">Health Blog</a>
+        <a href="#footer">Contact</a>
+      </nav>
+      <div class="hdr-right">
+        <a href="#" class="live-pill" onclick="document.getElementById('inp').focus();return false;">＋ Live Prices</a>
+        <div class="icon-btn">☀️</div>
+      </div>
     </div>
   </div>
 </header>
 
 <main>
 <div class="wrap">
+
+  <!-- Hero -->
   <div class="hero">
-    <h1>Compare <span class="hl">Medicine Prices</span> Instantly</h1>
-    <p>Live prices from PharmEasy, 1mg, Apollo & Truemeds — no ads, no bias</p>
-    <div class="search-wrap">
-      <div class="sbox">
-        <div class="si">🔍</div>
-        <input type="text" id="inp" placeholder="Search medicine e.g. Dolo 650, Metformin, Crocin..." autocomplete="off"/>
-        <button id="btn" onclick="doSearch()">Compare</button>
-      </div>
-      <div class="tags">
-        <span class="tag" onclick="qs('Dolo 650')">Dolo 650</span>
-        <span class="tag" onclick="qs('Crocin 500')">Crocin 500</span>
-        <span class="tag" onclick="qs('Metformin 500')">Metformin</span>
-        <span class="tag" onclick="qs('Azithromycin 500')">Azithromycin</span>
-        <span class="tag" onclick="qs('Pantoprazole 40')">Pantoprazole</span>
-        <span class="tag" onclick="qs('Vitamin D3')">Vitamin D3</span>
-        <span class="tag" onclick="qs('Amoxicillin 500')">Amoxicillin</span>
-        <span class="tag" onclick="qs('Atorvastatin 10')">Atorvastatin</span>
-      </div>
-    </div>
-  </div>
+    <div>
+      <div class="hero-badge">🛡️ Live Prices · No Ads · No Bias</div>
+      <h1>Compare <span class="hl">Medicine</span><br><span class="hl2">Prices</span> Instantly</h1>
+      <p>Live prices from PharmEasy, Truemeds, 1mg &amp; Apollo. No ads. No bias. Just savings.</p>
 
-  <div id="results">
-    <!-- Medicine title -->
-    <div class="med-title">
-      <div class="med-name">Results for "<span id="qt"></span>"</div>
-      <div class="med-meta">
-        <span id="rm">Checking pharmacies...</span>
-        <span class="tbadge" id="timeBadge" style="display:none"></span>
-        <span class="cbadge" id="cacheBadge" style="display:none">⚡ Cached</span>
-      </div>
-    </div>
-
-    <!-- Best deal banner -->
-    <div id="bestDeal" style="display:none" class="best-deal">
-      <div class="bd-left">
-        <div class="bd-icon">🏆</div>
-        <div>
-          <div class="bd-label">Best Price Found</div>
-          <div class="bd-pharmacy" id="bdPharmacy"></div>
-          <div class="bd-product" id="bdProduct"></div>
+      <div class="search-wrap">
+        <div class="search-row">
+          <div class="search-box">
+            <div class="si">🔍</div>
+            <input type="text" id="inp" placeholder="Search medicine e.g. Dolo 650, Crocin, Metformin..." autocomplete="off"/>
+          </div>
+          <div class="pincode-box" title="Pincode support coming in Phase 2">
+            <div class="pi">📍</div>
+            <input type="text" id="pincode" placeholder="Pincode" maxlength="6" pattern="[0-9]*" inputmode="numeric"/>
+          </div>
+        </div>
+        <button id="btn" onclick="doSearch()" style="margin-bottom:16px">Compare Prices →</button>
+        <div class="tags">
+          <span class="tags-label">Popular:</span>
+          <span class="tag" onclick="qs('Dolo 650')">Dolo 650</span>
+          <span class="tag" onclick="qs('Crocin 500')">Crocin 500</span>
+          <span class="tag" onclick="qs('Azithromycin 500')">Azithromycin</span>
+          <span class="tag" onclick="qs('Metformin 500')">Metformin</span>
+          <span class="tag" onclick="qs('Pantoprazole 40')">Pantoprazole</span>
+          <span class="tag" onclick="qs('Vitamin D3')">Vitamin D3</span>
         </div>
       </div>
-      <div style="text-align:right">
-        <div class="bd-price" id="bdPrice"></div>
-        <div class="bd-savings" id="bdSavings"></div>
-      </div>
-      <a href="#" id="bdBtn" target="_blank" rel="noopener" class="bd-btn">Buy Now →</a>
     </div>
 
-    <!-- Comparison table -->
-    <div class="tbl-header">
-      <div class="tbl-title">All pharmacies compared</div>
-      <div class="sort-bar">
-        <button class="sb active" onclick="sortBy('price',this)">↑ Price</button>
-        <button class="sb" onclick="sortBy('discount',this)">% Off</button>
-      </div>
-    </div>
-
-    <table class="compare-table" id="compareTable">
-      <thead>
-        <tr>
-          <th>Pharmacy</th>
-          <th>Price</th>
-          <th>MRP</th>
-          <th>Discount</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-
-    <div class="disclaimer">
-      <strong>⚠️ Note:</strong> Prices are live and may vary by pincode, stock, or ongoing offers. Always verify before purchasing. MedCompare is independent and not affiliated with any pharmacy.
+    <div class="hero-art">
+      <div class="art-glow"></div>
+      <div class="art-center">💊</div>
+      <div class="float-card fc1"><div class="fc-ico">💰</div><div><div>Save up to 70%</div><div class="fc-sub">on medicines</div></div></div>
+      <div class="float-card fc2"><div class="fc-ico">📈</div><div><div>Real-time</div><div class="fc-sub">Price updates</div></div></div>
+      <div class="float-card fc3"><div class="fc-ico">🏛️</div><div><div>Compare</div><div class="fc-sub">4+ Top Pharmacies</div></div></div>
     </div>
   </div>
 
+  <!-- Trust bar -->
+  <div class="trust-bar">
+    <div class="trust-item"><div class="trust-ico">🛡️</div><div><strong>Best Prices</strong><span>Find the lowest price</span></div></div>
+    <div class="trust-item"><div class="trust-ico">🚫</div><div><strong>100% Free</strong><span>No ads, no bias</span></div></div>
+    <div class="trust-item"><div class="trust-ico">⚡</div><div><strong>Instant Results</strong><span>Compare in seconds</span></div></div>
+    <div class="trust-item"><div class="trust-ico">🔒</div><div><strong>Safe &amp; Secure</strong><span>Your search is private</span></div></div>
+  </div>
+
+  <!-- Platforms -->
+  <div class="platforms">
+    <span style="font-size:11.5px;color:var(--muted);font-weight:600">Comparing across:</span>
+    <div class="pp"><div class="pd" style="background:#fb6200"></div>PharmEasy</div>
+    <div class="pp"><div class="pd" style="background:#e87722"></div>Truemeds</div>
+    <div class="pp"><div class="pd" style="background:#e8192c"></div>1mg</div>
+    <div class="pp"><div class="pd" style="background:#0072bc"></div>Apollo</div>
+  </div>
+
+  <div class="section-head" id="compare">
+    <h2>Compare &amp; <span>Save More</span></h2>
+    <p>See real-time prices from top online pharmacies — all in one place</p>
+  </div>
+
+  <!-- Results (functional — unchanged logic) -->
+  <div id="results">
+    <div class="rh">
+      <div>
+        <div class="rtitle">Results for "<span id="qt"></span>"</div>
+        <div class="rmeta">
+          <span id="rm">Fetching live prices...</span>
+          <span class="time-badge" id="timeBadge" style="display:none"></span>
+          <span class="cache-badge" id="cacheBadge" style="display:none">⚡ Cached</span>
+        </div>
+      </div>
+      <div class="sort-bar">
+        <button class="sb active" onclick="sortBy('price',this)">↑ Price</button>
+        <button class="sb" onclick="sortBy('discount',this)">% Discount</button>
+        <button class="sb" onclick="sortBy('match',this)">Match %</button>
+      </div>
+    </div>
+
+    <div id="bb" class="best-banner" style="display:none">
+      <div class="bl">
+        <span style="font-size:24px">🏆</span>
+        <div><div class="blabel">Best Deal Found</div><div class="bname" id="bn"></div></div>
+      </div>
+      <div style="text-align:right">
+        <div class="bprice" id="bp"></div>
+        <div class="bsave" id="bs"></div>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="disclaimer">
+      <strong>⚠️ Note:</strong> Prices are fetched live and may vary by pincode, availability, or ongoing offers.
+      Always verify the final price before purchasing. MedCompare is independent and not affiliated with any pharmacy.
+      Pincode-based pricing coming in Phase 2.
+    </div>
+  </div>
+
+  <!-- Popular Searches -->
   <div class="popular-section" id="popularSection" style="display:none">
     <div class="section-title">🔥 Popular Searches</div>
     <div class="popular-grid" id="popularGrid"></div>
   </div>
+
+  <!-- Why choose us -->
+  <div class="section-head" id="why">
+    <h2>Why People Choose <span>MedCompare?</span></h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-ico">⚖️</div><h3>Unbiased Results</h3><p>We show real prices, not sponsored listings</p></div>
+    <div class="feature-card"><div class="feature-ico">🐷</div><h3>Time &amp; Money Saver</h3><p>Find the best price in seconds</p></div>
+    <div class="feature-card"><div class="feature-ico">✅</div><h3>Trusted Data</h3><p>Live prices from leading pharmacies only</p></div>
+    <div class="feature-card"><div class="feature-ico">❤️</div><h3>Better Health for All</h3><p>Helping you get affordable medicines</p></div>
+  </div>
+
+  <!-- How it works -->
+  <div class="section-head" id="how-it-works">
+    <h2>How It <span>Works?</span></h2>
+  </div>
+  <div class="steps-row">
+    <div class="step"><div class="step-num">1</div><div class="step-ico">🔍</div><h3>Search Medicine</h3><p>Type the medicine name you want to buy</p><div class="step-arrow">→</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-ico">📋</div><h3>Compare Prices</h3><p>View live prices from top pharmacies</p><div class="step-arrow">→</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-ico">🏅</div><h3>Choose Best Price</h3><p>Pick the pharmacy with the lowest price</p><div class="step-arrow">→</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-ico">🛒</div><h3>Buy &amp; Save</h3><p>Click to visit the store and place your order</p></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-band">
+    <div>
+      <h3>Start Comparing <span>Now</span> &amp; Save on Your Next Medicine Purchase!</h3>
+      <p>Smart. Simple. Reliable.</p>
+    </div>
+    <a href="#compare" class="cta-btn" onclick="document.getElementById('inp').focus()">Compare Medicines →</a>
+  </div>
+
+  <!-- Blog -->
+  <div class="section-head" id="blog" style="text-align:left;display:flex;align-items:center;justify-content:space-between;padding-top:8px">
+    <h2 style="text-align:left">Latest from <span>Health Blog</span></h2>
+    <a href="#" class="section-link">View All →</a>
+  </div>
+  <div class="blog-grid">
+    <a href="#" class="blog-card">
+      <div class="blog-thumb" style="background:#F1F5F9">🌡️</div>
+      <div class="blog-body">
+        <h4>Paracetamol: Uses, Benefits and Safety Tips</h4>
+        <p>Everything you need to know about the most common fever and pain relief medicine.</p>
+        <span class="blog-read">Read More →</span>
+      </div>
+    </a>
+    <a href="#" class="blog-card">
+      <div class="blog-thumb" style="background:#ECFDF5">💊</div>
+      <div class="blog-body">
+        <h4>How to Save Money on Your Medicine Bills</h4>
+        <p>Smart tips to buy genuine medicines at the best price online.</p>
+        <span class="blog-read">Read More →</span>
+      </div>
+    </a>
+    <a href="#" class="blog-card">
+      <div class="blog-thumb" style="background:#FEF2F2">❤️</div>
+      <div class="blog-body">
+        <h4>Managing Fever at Home: Doctor's Guide</h4>
+        <p>Simple steps to take care of fever safely and effectively.</p>
+        <span class="blog-read">Read More →</span>
+      </div>
+    </a>
+  </div>
+
 </div>
 </main>
 
-<!-- Progress overlay -->
-<div class="progress-overlay" id="progressOverlay">
-  <div class="progress-box">
-    <div class="progress-medicine">Comparing "<span id="progMed"></span>"</div>
-    <div class="progress-subtitle">Checking live prices across pharmacies</div>
-    <div class="pharmacy-steps" id="pharmacySteps"></div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar" id="progressBar"></div>
+<footer id="footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo"><div class="logo-icon">💊</div><div class="logo-text">Med<span>Compare</span></div></div>
+        <p>We compare medicine prices from top online pharmacies to help you save more on your health.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Quick Links</h5>
+        <a href="#">Home</a><a href="#how-it-works">How It Works</a><a href="#blog">Health Blog</a><a href="#footer">Contact Us</a>
+      </div>
+      <div class="foot-col">
+        <h5>Popular Categories</h5>
+        <a href="javascript:qs('Paracetamol')">Pain Relief</a><a href="javascript:qs('Amoxicillin')">Antibiotics</a><a href="javascript:qs('Vitamin D3')">Vitamins &amp; Supplements</a><a href="javascript:qs('Metformin')">Diabetes Care</a>
+      </div>
+      <div class="foot-col">
+        <h5>Disclaimer</h5>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">MedCompare is an independent platform not affiliated with any pharmacy. Prices may vary. Please verify on the respective website before purchasing.</p>
+      </div>
     </div>
-    <div class="progress-msg" id="progressMsg">Starting search...</div>
+    <div class="foot-bottom">
+      <span>© 2026 MedCompare. All rights reserved. &nbsp;·&nbsp; <a href="/api/health">API Status</a></span>
+      <span><a href="#">Privacy Policy</a><a href="#">Terms &amp; Conditions</a></span>
+    </div>
   </div>
-</div>
-
-<footer>
-  <div class="wrap">MedCompare India — Helping Indians save on medicines &nbsp;·&nbsp; <a href="/api/health">Status</a></div>
 </footer>
 
 <script>
+// ── Config ────────────────────────────────────────────────────────────────────
 const API = window.location.origin;
 
 const PHARMACIES = ['PharmEasy','Truemeds','1mg','Apollo Pharmacy'];
 const META = {
-  'PharmEasy':       {emoji:'🟠', color:'#fb6200', rating:'4.3★', dot:'#fb6200'},
-  'Truemeds':        {emoji:'🟤', color:'#e87722', rating:'4.3★', dot:'#e87722'},
-  '1mg':             {emoji:'🔴', color:'#e8192c', rating:'4.5★', dot:'#e8192c'},
-  'Apollo Pharmacy': {emoji:'🔵', color:'#0072bc', rating:'4.4★', dot:'#0072bc'},
+  'PharmEasy':      {emoji:'🟠', color:'#fb6200', rating:'4.3★'},
+  'Truemeds':       {emoji:'🟤', color:'#e87722', rating:'4.3★'},
+  '1mg':            {emoji:'🔴', color:'#e8192c', rating:'4.5★'},
+  'Apollo Pharmacy':{emoji:'🔵', color:'#0072bc', rating:'4.4★'},
 };
 
 let DATA = {}, currentSort = 'price';
 
-// ── Render table ──────────────────────────────────────────────────────────────
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-
-  // Sort pharmacies
-  const sorted = [...PHARMACIES].sort((a, b) => {
-    const pa = DATA[a]?.products?.[0];
-    const pb = DATA[b]?.products?.[0];
-    if (currentSort === 'price') {
-      if (!pa && !pb) return 0;
-      if (!pa) return 1;
-      if (!pb) return -1;
-      return pa.price - pb.price;
-    } else {
-      const da = pa ? discPct(pa) : -1;
-      const db = pb ? discPct(pb) : -1;
-      return db - da;
-    }
-  });
-
-  // Find best price
-  const prices = PHARMACIES.map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
-  const bestPrice = prices.length ? Math.min(...prices) : null;
-
-  tbody.innerHTML = sorted.map(name => {
-    const m   = META[name];
-    const d   = DATA[name];
-    const p0  = d?.products?.[0];
-    const isBest = p0 && p0.price === bestPrice && prices.length > 1;
-
-    if (!d) {
-      // Still loading
-      return `<tr class="loading-row">
-        <td><div class="ph-cell">
-          <div class="ph-dot" style="background:${m.dot}"></div>
-          <div><span class="ph-name">${name}</span><span class="ph-rating">${m.rating}</span></div>
-        </div></td>
-        <td colspan="4" style="text-align:left">
-          <span class="spin-inline"></span>
-          <span class="skel" style="width:60px;height:12px"></span>
-        </td>
-      </tr>`;
-    }
-
-    if (!p0) {
-      // Not found
-      return `<tr class="nf-row">
-        <td><div class="ph-cell">
-          <div class="ph-dot" style="background:${m.dot};opacity:.4"></div>
-          <div><span class="ph-name" style="opacity:.5">${name}</span></div>
-        </div></td>
-        <td>—</td>
-        <td>—</td>
-        <td>—</td>
-        <td><a href="${d.searchUrl||'#'}" target="_blank" rel="noopener" class="buy-link secondary" style="opacity:.6">Search →</a></td>
-      </tr>`;
-    }
-
-    const disc = discPct(p0);
-    return `<tr class="data-row${isBest ? ' best-row' : ''}">
-      <td><div class="ph-cell">
-        <div class="ph-dot" style="background:${m.dot}"></div>
-        <div>
-          <span class="ph-name">${name}</span>
-          ${isBest ? '<span class="best-badge">BEST</span>' : ''}
-          <span class="ph-rating">${m.rating}</span>
-        </div>
-      </div></td>
-      <td><span class="price-cell${isBest?' best':''}">₹${(+p0.price).toFixed(2)}</span></td>
-      <td><span class="mrp-cell">${p0.mrp > p0.price ? '₹'+((+p0.mrp).toFixed(2)) : '—'}</span></td>
-      <td><span class="disc-cell">${disc > 0 ? disc+'% off' : '—'}</span></td>
-      <td><a href="${p0.link}" target="_blank" rel="noopener" class="buy-link ${isBest?'primary':'secondary'}">
-        ${isBest ? 'Buy Now →' : 'View →'}
-      </a></td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Best deal banner ──────────────────────────────────────────────────────────
-function updateBestDeal() {
-  const ok = PHARMACIES.filter(n => DATA[n]?.products?.[0]);
-  if (!ok.length) { document.getElementById('bestDeal').style.display='none'; return; }
-
-  const best  = ok.reduce((a,b) => DATA[a].products[0].price < DATA[b].products[0].price ? a : b);
-  const worst = ok.reduce((a,b) => DATA[a].products[0].price > DATA[b].products[0].price ? a : b);
-  const bp    = DATA[best].products[0];
-  const wp    = DATA[worst].products[0];
-  const save  = wp.price > bp.price ? (wp.price - bp.price) : 0;
-  const pct   = wp.price > bp.price ? Math.round((1 - bp.price/wp.price)*100) : 0;
-
-  document.getElementById('bestDeal').style.display = 'flex';
-  document.getElementById('bdPharmacy').textContent  = best;
-  document.getElementById('bdProduct').textContent   = bp.name;
-  document.getElementById('bdPrice').textContent     = `₹${(+bp.price).toFixed(2)}`;
-  document.getElementById('bdSavings').textContent   = save > 0
-    ? `Save ₹${save.toFixed(2)} (${pct}%) vs highest` : 'Lowest available price';
-  document.getElementById('bdBtn').href = bp.link;
-
-  // Update status
-  const done  = PHARMACIES.filter(n => DATA[n] !== undefined).length;
-  const found = ok.length;
-  const rmEl  = document.getElementById('rm');
-  if (done >= PHARMACIES.length) {
-    rmEl.textContent = `Prices found on ${found} of ${PHARMACIES.length} pharmacies`;
-  }
-}
-
-// ── Progress overlay ─────────────────────────────────────────────────────────
-const PROGRESS_MSGS = [
-  'Fetching live prices...',
-  'PharmEasy & Truemeds are fast...',
-  'Opening 1mg in browser...',
-  'Checking Apollo Pharmacy...',
-  'Almost done, comparing prices...',
-  'Finalizing best deal...',
-];
-
-function showProgress(q) {
-  document.getElementById('progMed').textContent = q;
-  document.getElementById('progressBar').style.width = '0%';
-  document.getElementById('progressMsg').textContent = PROGRESS_MSGS[0];
-
-  // Build pharmacy step rows
-  document.getElementById('pharmacySteps').innerHTML = PHARMACIES.map(n => `
-    <div class="ph-step" id="pstep-${eid(n)}">
-      <div class="ph-step-icon">${META[n].emoji}</div>
-      <div class="ph-step-info">
-        <div class="ph-step-name">${n}</div>
-        <div class="ph-step-status" id="pstatus-${eid(n)}">Waiting...</div>
+// ── Initialize cards with loading spinners ─────────────────────────────────
+function initCards() {
+  document.getElementById('grid').innerHTML = PHARMACIES.map((n,i) => `
+    <div class="card loading" id="card-${eid(n)}" style="animation-delay:${i*.06}s">
+      <div class="ctop">
+        <div class="plogo" style="background:${META[n].color}18;border:1px solid ${META[n].color}40">${META[n].emoji}</div>
+        <div><div class="pname">${n}</div><div class="prating">${META[n].rating}</div></div>
       </div>
-      <div class="ph-spinner" id="pspinner-${eid(n)}"></div>
+      <div class="divl"></div>
+      <div class="spin-c"></div>
     </div>`).join('');
-
-  document.getElementById('progressOverlay').classList.add('active');
 }
 
-function hideProgress() {
-  document.getElementById('progressOverlay').classList.remove('active');
+// ── Render one pharmacy card ───────────────────────────────────────────────
+function renderCard(name, data) {
+  const m   = META[name];
+  const p0  = data?.products?.[0];
+  const all = PHARMACIES.map(n => DATA[n]?.products?.[0]?.price).filter(Boolean);
+  const bp  = all.length ? Math.min(...all) : Infinity;
+  const isBest = p0 && p0.price === bp && all.length > 1;
+
+  const card = document.getElementById('card-' + eid(name));
+  if (!card) return;
+  card.className = 'card' + (isBest ? ' best' : '');
+
+  let body = `
+    ${isBest ? '<div class="best-tag">🏆 BEST PRICE</div>' : ''}
+    <div class="ctop">
+      <div class="plogo" style="background:${m.color}18;border:1px solid ${m.color}40">${m.emoji}</div>
+      <div><div class="pname">${name}</div><div class="prating">${m.rating}</div></div>
+    </div>
+    <div class="divl"></div>`;
+
+  if (p0) {
+    const d = p0.mrp > p0.price ? Math.round((1 - p0.price/p0.mrp)*100) : 0;
+    const ms = p0.match_score;
+    body += `
+      <div class="prod-name">${p0.name}</div>
+      ${ms ? `<div class="match-score">✓ ${ms}% match</div>` : ''}
+      <div class="price-row">
+        <div>
+          ${p0.mrp > p0.price ? `<div class="pmrp">MRP ₹${(+p0.mrp).toFixed(2)}</div>` : ''}
+          <div class="pmain" style="color:${m.color}">₹${(+p0.price).toFixed(2)}</div>
+        </div>
+        ${d > 0 ? `<div class="disc">${d}% OFF</div>` : ''}
+      </div>
+      <a href="${p0.link}" target="_blank" rel="noopener" class="buy ${isBest?'p':'s'}">
+        ${isBest ? '🛒 Buy — Best Price' : `View on ${name} →`}
+      </a>`;
+  } else {
+    const err = data?.error || '';
+    body += `
+      <div class="unavail">
+        <div class="uico">${err.includes('block') ? '🚫' : err ? '⚠️' : '🔍'}</div>
+        <div class="utxt">${err.includes('block') ? 'Pharmacy blocks automated access' : err ? 'Could not fetch price' : `Not found on ${name}`}</div>
+        <a href="${data?.searchUrl||'#'}" target="_blank" rel="noopener" class="buy s">Search Manually →</a>
+      </div>`;
+  }
+
+  card.innerHTML = body;
+  updateBanner();
+  reorder();
 }
 
-function updateProgress(done, total, results) {
-  const pct = Math.round((done / total) * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressMsg').textContent =
-    PROGRESS_MSGS[Math.min(done, PROGRESS_MSGS.length - 1)];
+// ── Best deal banner ──────────────────────────────────────────────────────
+function updateBanner() {
+  const ok   = PHARMACIES.map(n => DATA[n]).filter(d => d?.products?.[0]);
+  const done = PHARMACIES.filter(n => DATA[n] !== undefined).length;
 
-  // Update each pharmacy step based on available data
-  PHARMACIES.forEach(name => {
-    const r       = results[name];
-    const stepEl  = document.getElementById('pstep-' + eid(name));
-    const statEl  = document.getElementById('pstatus-' + eid(name));
-    const spinEl  = document.getElementById('pspinner-' + eid(name));
-    if (!stepEl) return;
+  if (!ok.length) { document.getElementById('bb').style.display='none'; return; }
+  const best = ok.reduce((a,b) => a.products[0].price < b.products[0].price ? a : b);
+  const max  = ok.reduce((a,b) => a.products[0].price > b.products[0].price ? a : b);
 
-    if (!r) {
-      // Still loading
-      stepEl.className = 'ph-step active';
-      if (statEl) statEl.textContent = 'Checking price...';
-      return;
-    }
+  document.getElementById('bb').style.display = 'flex';
+  document.getElementById('bn').textContent   = `${best.pharmacy} — ${best.products[0].name}`;
+  document.getElementById('bp').textContent   = `₹${(+best.products[0].price).toFixed(2)}`;
+  document.getElementById('bs').textContent   = max.products[0].price > best.products[0].price
+    ? `Save ₹${(max.products[0].price - best.products[0].price).toFixed(2)} vs highest`
+    : 'Lowest available price';
 
-    const p0 = r.products?.[0];
-    // Remove spinner
-    if (spinEl) spinEl.outerHTML = p0
-      ? `<div class="ph-step-price">₹${(+p0.price).toFixed(2)}</div>`
-      : `<div class="ph-cross">—</div>`;
-
-    if (p0) {
-      stepEl.className = 'ph-step found';
-      if (statEl) statEl.textContent = p0.name.length > 30 ? p0.name.slice(0,30)+'...' : p0.name;
-    } else {
-      stepEl.className = 'ph-step done';
-      if (statEl) statEl.textContent = 'Not available';
-    }
-  });
+  const found = ok.length;
+  document.getElementById('rm').textContent =
+    `Found on ${found} of ${done} pharmacies checked${done < PHARMACIES.length ? ' · fetching more...' : ''}`;
 }
 
-// ── Main search ───────────────────────────────────────────────────────────────
-let progressTimer = null;
+// ── Sort cards ────────────────────────────────────────────────────────────
+function reorder() {
+  const grid = document.getElementById('grid');
+  [...grid.children].sort((a,b) => {
+    const na = a.id.replace('card-','').replace(/_/g,' ');
+    const nb = b.id.replace('card-','').replace(/_/g,' ');
+    const pa = DATA[na]?.products?.[0];
+    const pb = DATA[nb]?.products?.[0];
+    if (currentSort === 'price')    return (pa?.price??Infinity) - (pb?.price??Infinity);
+    if (currentSort === 'discount') return (discPct(pb)) - (discPct(pa));
+    if (currentSort === 'match')    return (pb?.match_score||0) - (pa?.match_score||0);
+    return 0;
+  }).forEach(c => grid.appendChild(c));
+  // Re-render to update best-tag after sort
+  PHARMACIES.forEach(n => { if (DATA[n]) renderCard(n, DATA[n]); });
+}
 
+// ── Main search ───────────────────────────────────────────────────────────
 async function doSearch() {
-  const q = document.getElementById('inp').value.trim();
+  const q       = document.getElementById('inp').value.trim();
+  const pincode = document.getElementById('pincode').value.trim();
   if (!q) { document.getElementById('inp').focus(); return; }
 
   document.getElementById('btn').disabled    = true;
-  document.getElementById('btn').textContent = 'Comparing...';
-  document.getElementById('results').style.display    = 'none';
+  document.getElementById('btn').textContent = 'Searching...';
+  document.getElementById('qt').textContent  = q;
+  document.getElementById('rm').textContent  = 'Fetching live prices...';
+  document.getElementById('bb').style.display = 'none';
+  document.getElementById('timeBadge').style.display  = 'none';
+  document.getElementById('cacheBadge').style.display = 'none';
+  document.getElementById('results').style.display    = 'block';
   document.getElementById('popularSection').style.display = 'none';
   DATA = {};
-
-  // Show progress overlay
-  showProgress(q);
-
-  // Animate steps — simulate progressive loading feel
-  let stepsDone = 0;
-  const stepTimer = setInterval(() => {
-    stepsDone++;
-    updateProgress(stepsDone, PHARMACIES.length + 1, DATA);
-    if (stepsDone >= PHARMACIES.length) clearInterval(stepTimer);
-  }, 3200);
+  initCards();
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
 
   try {
-    const res  = await fetch(`${API}/api/compare?medicine=${encodeURIComponent(q)}`);
+    const url  = `${API}/api/compare?medicine=${encodeURIComponent(q)}${pincode ? '&pincode='+pincode : ''}`;
+    const res  = await fetch(url);
     const json = await res.json();
 
-    clearInterval(stepTimer);
-
-    // Populate DATA and animate final state
+    // Map results by pharmacy name
     json.results.forEach(r => { DATA[r.pharmacy] = r; });
-    PHARMACIES.forEach(n => {
-      if (!DATA[n]) DATA[n] = {pharmacy:n, products:[], error:'No data', searchUrl:'#'};
+
+    // Render all cards
+    PHARMACIES.forEach(name => {
+      const d = DATA[name] || {pharmacy:name, products:[], error:'No data', searchUrl:'#'};
+      DATA[name] = d;
+      renderCard(name, d);
     });
 
-    // Show all results in overlay briefly before hiding
-    updateProgress(PHARMACIES.length, PHARMACIES.length, DATA);
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('progressMsg').textContent = '✅ Done! Showing results...';
-
-    await new Promise(r => setTimeout(r, 900));
-    hideProgress();
-
-    // Show results section
-    document.getElementById('qt').textContent  = q;
-    document.getElementById('rm').textContent  = 'Checking pharmacies...';
-    document.getElementById('bestDeal').style.display  = 'none';
-    document.getElementById('timeBadge').style.display  = 'none';
-    document.getElementById('cacheBadge').style.display = 'none';
-    document.getElementById('results').style.display    = 'block';
-
-    setTimeout(() => {
-      document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
-    }, 100);
-
-    renderTable();
-    updateBestDeal();
-    document.getElementById('rm').dataset.done = '1';
-
+    // Show timing
     const tb = document.getElementById('timeBadge');
-    tb.textContent   = json.cached ? '⚡ Cached' : `⏱ ${json.time_taken}s`;
+    tb.textContent  = `⏱ ${json.time_taken}s`;
     tb.style.display = 'inline';
     if (json.cached) document.getElementById('cacheBadge').style.display = 'inline';
 
+    updateBanner();
+
   } catch(err) {
-    clearInterval(stepTimer);
-    hideProgress();
-    document.getElementById('results').style.display = 'block';
     document.getElementById('rm').textContent = `⚠️ Error: ${err.message}`;
-    document.getElementById('tableBody').innerHTML = `
-      <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">
-        Could not reach API. Please try again.
-      </td></tr>`;
+    document.getElementById('grid').innerHTML = `
+      <div style="grid-column:1/-1;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:20px;text-align:center">
+        <div style="font-size:26px;margin-bottom:8px">⚠️</div>
+        <strong style="color:var(--danger)">${err.message}</strong>
+        <p style="color:var(--muted);font-size:12px;margin-top:6px">Check that the API is running at ${API}</p>
+      </div>`;
   }
 
   document.getElementById('btn').disabled    = false;
-  document.getElementById('btn').textContent = 'Compare';
+  document.getElementById('btn').textContent = 'Compare Prices →';
 }
 
-function sortBy(t, btn) {
-  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  currentSort = t;
-  renderTable();
-}
-
+// ── Load popular searches ─────────────────────────────────────────────────
 async function loadPopular() {
   try {
     const res  = await fetch(`${API}/api/popular`);
@@ -567,16 +662,29 @@ async function loadPopular() {
     const list = json.popular || [];
     if (!list.length) return;
     document.getElementById('popularSection').style.display = 'block';
-    document.getElementById('popularGrid').innerHTML = list.map((p,i) =>
-      `<div class="pop-item" onclick="qs('${p.query}')">#${i+1} ${p.query}</div>`
-    ).join('');
+    document.getElementById('popularGrid').innerHTML = list.map((p,i) => `
+      <div class="pop-item" onclick="qs('${p.query}')">
+        <span class="pop-rank">#${i+1}</span>
+        <span>${p.query}</span>
+        <span style="color:var(--accent2);font-size:10px">${p.count}x</span>
+      </div>`).join('');
   } catch(e) {}
 }
 
-function discPct(p){ return p&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0; }
-function eid(n){ return n.replace(/\s/g,'_'); }
-function qs(t){ document.getElementById('inp').value=t; doSearch(); }
-document.getElementById('inp').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+// ── Helpers ───────────────────────────────────────────────────────────────
+function eid(n)      { return n.replace(/\s/g,'_'); }
+function discPct(p)  { return p && p.mrp > p.price ? Math.round((1-p.price/p.mrp)*100) : 0; }
+function sortBy(t,b) {
+  document.querySelectorAll('.sb').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  currentSort = t;
+  reorder();
+}
+function qs(t) { document.getElementById('inp').value = t; doSearch(); }
+document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+document.getElementById('pincode').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+
+// Load popular on page load
 loadPopular();
 </script>
 </body>
