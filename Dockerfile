@@ -1,5 +1,10 @@
 FROM python:3.11-slim-bookworm
 
+# Ensure Python's print() output is flushed immediately instead of being
+# buffered — without this, print() statements can silently never appear
+# in Railway's logs even though the code ran fine.
+ENV PYTHONUNBUFFERED=1
+
 # Install system dependencies for Chromium
 RUN apt-get update && apt-get install -y \
     wget \

@@ -157,10 +157,13 @@ async def fetch_pharmeasy(query: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
             r = await client.get(url, headers=BASE_HEADERS)
+            print(f"DEBUG PHARMEASY [{query}]: status={r.status_code}, body_len={len(r.text)}", flush=True)
             m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.DOTALL)
+            print(f"DEBUG PHARMEASY [{query}]: __NEXT_DATA__ found={bool(m)}", flush=True)
             if m:
                 pp  = json.loads(m.group(1)).get("props", {}).get("pageProps", {})
                 lst = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
+                print(f"DEBUG PHARMEASY [{query}]: raw product list length={len(lst)}, pageProps keys={list(pp.keys())[:10]}", flush=True)
                 products = []
                 for p in lst[:5]:
                     name  = p.get("name") or p.get("productName") or ""
@@ -174,9 +177,11 @@ async def fetch_pharmeasy(query: str) -> dict:
                             image = dam_images[0].get("url")
                     prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}", image)
                     if prod: products.append(prod)
+                print(f"DEBUG PHARMEASY [{query}]: products after mk() filter={len(products)}", flush=True)
                 if products:
                     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None}
-    except Exception: pass
+    except Exception as e:
+        print(f"DEBUG PHARMEASY [{query}]: EXCEPTION {type(e).__name__}: {e}", flush=True)
     return {"pharmacy": pharmacy, "products": [], "searchUrl": url, "error": "Could not fetch"}
 
 
