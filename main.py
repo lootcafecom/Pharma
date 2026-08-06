@@ -157,20 +157,16 @@ async def fetch_pharmeasy(query: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
             r = await client.get(url, headers=BASE_HEADERS)
-            print(f"DEBUG PHARMEASY [{query}]: status={r.status_code}, body_len={len(r.text)}", flush=True)
             m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', r.text, re.DOTALL)
-            print(f"DEBUG PHARMEASY [{query}]: __NEXT_DATA__ found={bool(m)}", flush=True)
             if m:
                 pp  = json.loads(m.group(1)).get("props", {}).get("pageProps", {})
-                generics_lst = pp.get("genericsProductList") or []
-                brand_lst    = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
-                print(f"DEBUG PHARMEASY [{query}]: genericsProductList len={len(generics_lst)}, productList len={len(brand_lst)}, isGenericsFlow={pp.get('isGenericsFlow')}", flush=True)
                 # Prefer the generics list when it has results — it's the literally-
                 # named salt/generic match (e.g. "Metformin 500mg"), whereas
                 # productList often holds brand alternatives (Glycomet, Okamet, etc.)
                 # that don't text-match a generic salt search well.
+                generics_lst = pp.get("genericsProductList") or []
+                brand_lst    = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
                 lst = generics_lst or brand_lst
-                print(f"DEBUG PHARMEASY [{query}]: raw product list length={len(lst)}, pageProps keys={list(pp.keys())[:10]}", flush=True)
                 products = []
                 for p in lst[:5]:
                     name  = p.get("name") or p.get("productName") or ""
@@ -184,11 +180,10 @@ async def fetch_pharmeasy(query: str) -> dict:
                             image = dam_images[0].get("url")
                     prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}", image)
                     if prod: products.append(prod)
-                print(f"DEBUG PHARMEASY [{query}]: products after mk() filter={len(products)}", flush=True)
                 if products:
                     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None}
-    except Exception as e:
-        print(f"DEBUG PHARMEASY [{query}]: EXCEPTION {type(e).__name__}: {e}", flush=True)
+    except Exception:
+        pass
     return {"pharmacy": pharmacy, "products": [], "searchUrl": url, "error": "Could not fetch"}
 
 
@@ -449,19 +444,6 @@ async def compare(medicine: str = Query(..., min_length=1), pincode: str = Query
         raw.append(result)
 
     matched    = group_by_medicine(raw, q, threshold=70.0)
-
-    # DEBUG: see exactly why a pharmacy's products might get filtered out
-    from services.matcher import match_score
-    for r in raw:
-        if r["pharmacy"] == "PharmEasy":
-            print(f"DEBUG MATCH [{q}]: PharmEasy raw product names and scores:", flush=True)
-            for p in r.get("products", []):
-                s = match_score(q, p.get("name", ""))
-                print(f"  - '{p.get('name')}' -> score={s:.1f} (threshold=70.0)", flush=True)
-    for r in matched:
-        if r["pharmacy"] == "PharmEasy":
-            print(f"DEBUG MATCH [{q}]: PharmEasy products AFTER filter={len(r.get('products', []))}", flush=True)
-
     best_price = best_ph = None
     max_price  = 0.0
     found_on   = 0
