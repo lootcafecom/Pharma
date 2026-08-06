@@ -70,7 +70,7 @@ def px(s) -> float:
     try: return float(re.sub(r"[^\d.]", "", str(s)))
     except: return 0.0
 
-def mk(name, price, mrp, link) -> dict | None:
+def mk(name, price, mrp, link, image=None) -> dict | None:
     price = px(price); mrp = px(mrp) or price
     if not name or price <= 0: return None
     if price > 50000: price /= 100
@@ -81,6 +81,7 @@ def mk(name, price, mrp, link) -> dict | None:
         "mrp":      round(mrp, 2),
         "discount": round((1 - price/mrp)*100) if mrp > price else 0,
         "link":     link,
+        "image":    image,
         "inStock":  True,
     }
 
@@ -162,12 +163,12 @@ async def fetch_pharmeasy(query: str) -> dict:
                 lst = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
                 products = []
                 for p in lst[:5]:
-                    print("DEBUG PHARMEASY PRODUCT:", json.dumps(p, indent=2)[:2000])
                     name  = p.get("name") or p.get("productName") or ""
                     price = p.get("salePriceDecimal") or p.get("sellingPrice") or p.get("price")
                     mrp   = p.get("mrpDecimal") or p.get("mrp") or price
                     slug  = p.get("slug") or p.get("urlKey") or ""
-                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}")
+                    image = p.get("image")
+                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}", image)                    
                     if prod: products.append(prod)
                 if products:
                     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None}
