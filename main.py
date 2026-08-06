@@ -442,6 +442,19 @@ async def compare(medicine: str = Query(..., min_length=1), pincode: str = Query
         raw.append(result)
 
     matched    = group_by_medicine(raw, q, threshold=70.0)
+
+    # DEBUG: see exactly why a pharmacy's products might get filtered out
+    from services.matcher import match_score
+    for r in raw:
+        if r["pharmacy"] == "PharmEasy":
+            print(f"DEBUG MATCH [{q}]: PharmEasy raw product names and scores:", flush=True)
+            for p in r.get("products", []):
+                s = match_score(q, p.get("name", ""))
+                print(f"  - '{p.get('name')}' -> score={s:.1f} (threshold=70.0)", flush=True)
+    for r in matched:
+        if r["pharmacy"] == "PharmEasy":
+            print(f"DEBUG MATCH [{q}]: PharmEasy products AFTER filter={len(r.get('products', []))}", flush=True)
+
     best_price = best_ph = None
     max_price  = 0.0
     found_on   = 0
