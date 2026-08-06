@@ -162,6 +162,7 @@ async def fetch_pharmeasy(query: str) -> dict:
                 lst = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
                 products = []
                 for p in lst[:5]:
+                    print("DEBUG PHARMEASY PRODUCT:", json.dumps(p, indent=2)[:2000])
                     name  = p.get("name") or p.get("productName") or ""
                     price = p.get("salePriceDecimal") or p.get("sellingPrice") or p.get("price")
                     mrp   = p.get("mrpDecimal") or p.get("mrp") or price
