@@ -167,8 +167,8 @@ async def fetch_pharmeasy(query: str) -> dict:
                     price = p.get("salePriceDecimal") or p.get("sellingPrice") or p.get("price")
                     mrp   = p.get("mrpDecimal") or p.get("mrp") or price
                     slug  = p.get("slug") or p.get("urlKey") or ""
-                    image = p.get("image")
-                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}", image)                    
+                    image = p.get("image")  # confirmed field — direct URL string
+                    prod  = mk(name, price, mrp, f"https://pharmeasy.in/online-medicine-order/{slug}", image)
                     if prod: products.append(prod)
                 if products:
                     return {"pharmacy": pharmacy, "products": products, "searchUrl": url, "error": None}
