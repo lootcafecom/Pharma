@@ -162,7 +162,14 @@ async def fetch_pharmeasy(query: str) -> dict:
             print(f"DEBUG PHARMEASY [{query}]: __NEXT_DATA__ found={bool(m)}", flush=True)
             if m:
                 pp  = json.loads(m.group(1)).get("props", {}).get("pageProps", {})
-                lst = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
+                generics_lst = pp.get("genericsProductList") or []
+                brand_lst    = pp.get("productList") or pp.get("searchResult", {}).get("products") or []
+                print(f"DEBUG PHARMEASY [{query}]: genericsProductList len={len(generics_lst)}, productList len={len(brand_lst)}, isGenericsFlow={pp.get('isGenericsFlow')}", flush=True)
+                # Prefer the generics list when it has results — it's the literally-
+                # named salt/generic match (e.g. "Metformin 500mg"), whereas
+                # productList often holds brand alternatives (Glycomet, Okamet, etc.)
+                # that don't text-match a generic salt search well.
+                lst = generics_lst or brand_lst
                 print(f"DEBUG PHARMEASY [{query}]: raw product list length={len(lst)}, pageProps keys={list(pp.keys())[:10]}", flush=True)
                 products = []
                 for p in lst[:5]:
