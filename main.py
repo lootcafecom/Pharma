@@ -381,14 +381,21 @@ async def fetch_apollo(query: str) -> dict:
     for resp in captured:
         items = find_list(resp.get("data", {}))
         if not items: continue
-        print(f"DEBUG APOLLO [{query}]: raw item sample:", json.dumps(items[0], indent=2)[:2000], flush=True)
         for p in items[:5]:
             name  = next((p.get(f) for f in ["name","productName","title"] if p.get(f)), "")
             price = next((px(p.get(f)) for f in ["offerPrice","sellingPrice","price"] if p.get(f) and px(p.get(f)) > 0), 0.0)
             mrp   = next((px(p.get(f)) for f in ["mrpPrice","mrp","MRP"] if p.get(f) and px(p.get(f)) > 0), price)
             slug  = next((str(p.get(f)) for f in ["urlKey","slug","productId","id"] if p.get(f)), "")
             link  = f"https://www.apollopharmacy.in/medicine/{slug}" if slug else url
-            prod  = mk(name, price, mrp, link)
+            # NOTE: "thumbnail" is a relative path (e.g. "/catalog/product/m/e/x.jpg"),
+            # not a full URL. This "/media" prefix is a best-effort guess based on
+            # the Magento-style path shape — please open one resulting image URL
+            # directly in your browser to confirm it actually loads a real image;
+            # if it 404s, tell me and we'll try a different base (e.g. a CDN
+            # subdomain) rather than guessing again blind.
+            thumb = p.get("thumbnail")
+            image = f"https://www.apollopharmacy.in/media{thumb}" if thumb else None
+            prod  = mk(name, price, mrp, link, image)
             if prod: products.append(prod)
         if products: break
 
