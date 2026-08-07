@@ -218,6 +218,8 @@ async def fetch_truemeds(query: str) -> dict:
                 return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": f"API {r.status_code}"}
 
             items    = r.json().get("responseData", {}).get("elasticProductDetails", [])
+            if items:
+                print(f"DEBUG TRUEMEDS [{query}]: raw product sample:", json.dumps(items[0].get("product", {}), indent=2)[:2000], flush=True)
             products = []
             for item in items[:5]:
                 p     = item.get("product", {})
