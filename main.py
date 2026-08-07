@@ -304,8 +304,6 @@ async def fetch_1mg(query: str) -> dict:
             break
 
     items    = found.get("data", {}).get("search_results", [])
-    if items:
-        print(f"DEBUG 1MG [{query}]: raw item sample:", json.dumps(items[0], indent=2)[:2000], flush=True)
     products = []
     for item in items[:5]:
         name   = item.get("name", "")
@@ -314,7 +312,8 @@ async def fetch_1mg(query: str) -> dict:
         mrp    = px(prices.get("mrp") or prices.get("discounted_price"))
         path   = item.get("url", "")
         link   = f"https://www.1mg.com{path}" if path else url
-        prod   = mk(name, price, mrp, link)
+        image  = item.get("image")
+        prod   = mk(name, price, mrp, link, image)
         if prod: products.append(prod)
 
     return {"pharmacy": pharmacy, "products": products,
