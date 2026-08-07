@@ -381,6 +381,7 @@ async def fetch_apollo(query: str) -> dict:
     for resp in captured:
         items = find_list(resp.get("data", {}))
         if not items: continue
+        print(f"DEBUG APOLLO [{query}]: raw item sample:", json.dumps(items[0], indent=2)[:2000], flush=True)
         for p in items[:5]:
             name  = next((p.get(f) for f in ["name","productName","title"] if p.get(f)), "")
             price = next((px(p.get(f)) for f in ["offerPrice","sellingPrice","price"] if p.get(f) and px(p.get(f)) > 0), 0.0)
