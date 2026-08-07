@@ -304,6 +304,8 @@ async def fetch_1mg(query: str) -> dict:
             break
 
     items    = found.get("data", {}).get("search_results", [])
+    if items:
+        print(f"DEBUG 1MG [{query}]: raw item sample:", json.dumps(items[0], indent=2)[:2000], flush=True)
     products = []
     for item in items[:5]:
         name   = item.get("name", "")
