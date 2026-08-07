@@ -218,14 +218,13 @@ async def fetch_truemeds(query: str) -> dict:
                 return {"pharmacy": pharmacy, "products": [], "searchUrl": base_url, "error": f"API {r.status_code}"}
 
             items    = r.json().get("responseData", {}).get("elasticProductDetails", [])
-            if items:
-                print(f"DEBUG TRUEMEDS [{query}]: raw product sample:", json.dumps(items[0].get("product", {}), indent=2)[:2000], flush=True)
             products = []
             for item in items[:5]:
                 p     = item.get("product", {})
                 name  = p.get("skuName") or p.get("productName") or ""
                 price = px(p.get("sellingPrice") or p.get("discountedPrice") or p.get("mrp"))
                 mrp   = px(p.get("mrp") or price)
+                image = (p.get("productImageUrlArray") or [None])[0]
                 # Use productUrlSuffix directly — confirmed exact field from API
                 # e.g. "otc/dolo-650-mg-tablet-15-tm-tacr1-011691"
                 url_suffix = p.get("productUrlSuffix") or ""
@@ -233,7 +232,7 @@ async def fetch_truemeds(query: str) -> dict:
                     link = f"https://www.truemeds.in/{url_suffix}"
                 else:
                     link = f"https://www.truemeds.in/search?query={quote(name)}"
-                prod  = mk(name, price, mrp, link)
+                prod  = mk(name, price, mrp, link, image)
                 if prod: products.append(prod)
 
             return {"pharmacy": pharmacy, "products": products,
