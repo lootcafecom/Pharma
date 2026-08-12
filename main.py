@@ -271,6 +271,12 @@ async def fetch_1mg(query: str) -> dict:
                     # Signal early exit when search API responds
                     if "search/all" in resp.url and "pwa-dweb-api" in resp.url:
                         search_done.set()
+                        try:
+                            req = resp.request
+                            print(f"DEBUG 1MG API CALL [{query}]: url={resp.url}", flush=True)
+                            print(f"DEBUG 1MG API CALL [{query}]: request headers={dict(req.headers)}", flush=True)
+                        except Exception as e:
+                            print(f"DEBUG 1MG API CALL [{query}]: could not read request details: {e}", flush=True)
             except Exception: pass
 
         page = await ctx.new_page()
